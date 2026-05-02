@@ -16,7 +16,8 @@ export interface LoginTokens {
 
 export interface LoginResponse {
   operacionExitosa: boolean;
-  resultado: LoginTokens;
+  mensaje?: string;
+  resultado?: LoginTokens;
 }
 
 @Injectable({ providedIn: 'root' })

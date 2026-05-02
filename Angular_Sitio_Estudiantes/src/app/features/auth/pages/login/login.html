@@ -1,0 +1,23 @@
+<div class="wrap">
+  <form class="card" (ngSubmit)="iniciarSesion()">
+    <h1>Iniciar sesión</h1>
+    @if (errorMsg) {
+      <p class="err">{{ errorMsg }}</p>
+    }
+    <label>
+      Usuario
+      <input name="nombreUsuario" [(ngModel)]="nombreUsuario" autocomplete="username" [disabled]="loading" />
+    </label>
+    <label>
+      Contraseña
+      <input
+        name="password"
+        type="password"
+        [(ngModel)]="password"
+        autocomplete="current-password"
+        [disabled]="loading"
+      />
+    </label>
+    <button type="submit" [disabled]="loading">{{ loading ? 'Entrando…' : 'Entrar' }}</button>
+  </form>
+</div>
