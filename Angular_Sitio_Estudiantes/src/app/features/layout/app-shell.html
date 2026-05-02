@@ -1,0 +1,22 @@
+<div class="app-shell">
+  <header class="app-shell__header">
+    <a routerLink="/inicio" class="app-shell__brand">
+      <span class="app-shell__logo pi pi-graduation-cap" aria-hidden="true"></span>
+      <span class="app-shell__title">Portal estudiantes</span>
+    </a>
+    <p-menubar class="app-shell__menu" [model]="navItems">
+      <ng-template pTemplate="end">
+        <p-button
+          label="Cerrar sesión"
+          icon="pi pi-sign-out"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="cerrarSesion()"
+        />
+      </ng-template>
+    </p-menubar>
+  </header>
+  <main class="app-shell__main">
+    <router-outlet />
+  </main>
+</div>

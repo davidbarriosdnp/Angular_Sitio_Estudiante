@@ -1,44 +1,60 @@
-.wrap {
-  min-height: 100dvh;
+.home__intro {
+  margin-bottom: 1.5rem;
+}
+
+.home__title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.home__text {
+  margin: 0.5rem 0 0;
+  max-width: 42rem;
+  color: var(--p-text-muted-color, #64748b);
+  line-height: 1.5;
+}
+
+.home__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1.25rem;
+}
+
+.home__card {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
 }
 
-.bar {
+.home__card-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid #e5e7eb;
-
-  h1 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-
-  button {
-    padding: 0.45rem 0.75rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #fff;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover {
-      background: #f8fafc;
-    }
-  }
+  justify-content: center;
+  padding: 1.75rem 1rem;
+  font-size: 2.25rem;
+  color: #fff;
 }
 
-.main {
-  flex: 1;
-  padding: 1.25rem;
+.home__card-head--students {
+  background: linear-gradient(135deg, var(--p-primary-500, #6366f1), var(--p-primary-700, #4338ca));
 }
 
-p {
+.home__card-head--admin {
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+}
+
+.home__card-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.home__card-text {
   margin: 0;
-  color: #475569;
+  color: var(--p-text-muted-color, #64748b);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  flex: 1;
 }

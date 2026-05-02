@@ -1,0 +1,149 @@
+<section class="page">
+  <div class="page__head">
+    <h1 class="page__title">Estudiantes</h1>
+    <p class="page__subtitle">Alta, edición y baja lógica de registros académicos.</p>
+  </div>
+
+  <p-toolbar class="page__toolbar">
+    <ng-template pTemplate="start">
+      <p-button label="Nuevo" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+      <p-button
+        label="Refrescar"
+        icon="pi pi-refresh"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="refrescar()"
+      />
+    </ng-template>
+    <ng-template pTemplate="end">
+      <p-button
+        [label]="soloActivos ? 'Solo activos' : 'Incluir inactivos'"
+        [icon]="soloActivos ? 'pi pi-filter' : 'pi pi-filter-slash'"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="toggleSoloActivos()"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <div class="page__table-wrap">
+    @if (cargando && !filas.length) {
+      <div class="page__loading">
+        <p-progress-spinner strokeWidth="4" aria-label="Cargando" />
+      </div>
+    } @else {
+      <p-table
+        [value]="filas"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [loading]="cargando"
+        dataKey="estudianteId"
+        styleClass="p-datatable-sm"
+        [tableStyle]="{ 'min-width': '52rem' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th pSortableColumn="estudianteId" style="width: 6rem">
+              ID <p-sortIcon field="estudianteId" />
+            </th>
+            <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+            <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+            <th>Programa</th>
+            <th pSortableColumn="fechaRegistro">Registro <p-sortIcon field="fechaRegistro" /></th>
+            <th>Estado</th>
+            <th style="width: 9rem; text-align: right">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>{{ row.estudianteId }}</td>
+            <td>{{ row.nombre }}</td>
+            <td>{{ row.email }}</td>
+            <td>{{ programaLabel(row.programaCreditoId) }}</td>
+            <td>{{ row.fechaRegistro | date: 'short' }}</td>
+            <td>
+              <p-tag
+                [value]="row.estado === 1 ? 'Activo' : 'Inactivo'"
+                [severity]="severidadEstado(row.estado)"
+              />
+            </td>
+            <td class="acciones">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                (onClick)="editar(row)"
+                aria-label="Editar"
+              />
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                (onClick)="eliminar(row)"
+                aria-label="Eliminar"
+              />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="7">No hay estudiantes para mostrar.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+</section>
+
+<p-dialog
+  [(visible)]="dialogoVisible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(32rem, 95vw)' }"
+  [header]="modoEdicion ? 'Editar estudiante' : 'Nuevo estudiante'"
+>
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="guardar()">
+    <p-floatlabel>
+      <input pInputText id="est-nombre" formControlName="nombre" autocomplete="name" class="w-full" />
+      <label for="est-nombre">Nombre completo</label>
+    </p-floatlabel>
+    <p-floatlabel>
+      <input pInputText id="est-email" formControlName="email" autocomplete="email" class="w-full" />
+      <label for="est-email">Correo electrónico</label>
+    </p-floatlabel>
+    <div class="field">
+      <label class="field__label" for="est-prog">Programa de créditos</label>
+      <p-select
+        inputId="est-prog"
+        formControlName="programaCreditoId"
+        [options]="programas"
+        optionLabel="nombre"
+        optionValue="programaCreditoId"
+        placeholder="Seleccione (opcional)"
+        [showClear]="true"
+        styleClass="w-full"
+      />
+    </div>
+    @if (modoEdicion) {
+      <div class="field">
+        <label class="field__label" for="est-estado">Estado</label>
+        <p-select
+          inputId="est-estado"
+          formControlName="estado"
+          [options]="opcionesEstado"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+      </div>
+    }
+    <div class="form-actions">
+      <p-button label="Cancelar" severity="secondary" type="button" [outlined]="true" (onClick)="dialogoVisible = false" />
+      <p-button [label]="modoEdicion ? 'Guardar cambios' : 'Crear'" icon="pi pi-check" type="submit" [loading]="cargando" />
+    </div>
+  </form>
+</p-dialog>

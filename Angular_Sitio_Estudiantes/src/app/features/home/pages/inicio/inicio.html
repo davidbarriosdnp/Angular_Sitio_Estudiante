@@ -1,9 +1,42 @@
-<div class="wrap">
-  <header class="bar">
-    <h1>Inicio</h1>
-    <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+<section class="home">
+  <header class="home__intro">
+    <h1 class="home__title">Panel principal</h1>
+    <p class="home__text">
+      Gestione estudiantes y, con permisos de administrador, las cuentas de usuario del sistema.
+    </p>
   </header>
-  <main class="main">
-    <p>Sesión activa.</p>
-  </main>
-</div>
+
+  <div class="home__grid">
+    <p-card styleClass="home__card">
+      <ng-template pTemplate="header">
+        <div class="home__card-head home__card-head--students">
+          <span class="pi pi-users" aria-hidden="true"></span>
+        </div>
+      </ng-template>
+      <h2 class="home__card-title">Estudiantes</h2>
+      <p class="home__card-text">Listado, creación, edición y baja lógica de registros académicos.</p>
+      <ng-template pTemplate="footer">
+        <p-button label="Ir a estudiantes" icon="pi pi-arrow-right" iconPos="right" routerLink="/estudiantes" />
+      </ng-template>
+    </p-card>
+
+    <p-card styleClass="home__card">
+      <ng-template pTemplate="header">
+        <div class="home__card-head home__card-head--admin">
+          <span class="pi pi-id-card" aria-hidden="true"></span>
+        </div>
+      </ng-template>
+      <h2 class="home__card-title">Usuarios</h2>
+      <p class="home__card-text">Administración de cuentas. Requiere rol administrador en la API.</p>
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Ir a usuarios"
+          icon="pi pi-arrow-right"
+          iconPos="right"
+          severity="secondary"
+          routerLink="/usuarios"
+        />
+      </ng-template>
+    </p-card>
+  </div>
+</section>

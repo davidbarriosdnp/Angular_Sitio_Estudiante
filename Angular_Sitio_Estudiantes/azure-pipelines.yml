@@ -1,0 +1,42 @@
+# Azure DevOps — compila el front y publica `dist/` como artefacto.
+#
+# Si el repositorio tiene la app en una subcarpeta, define la variable de pipeline:
+#   projectPath = Angular_Sitio_Estudiantes
+# Si package.json está en la raíz del repo, deja projectPath vacío o usa ".".
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  nodeVersion: '22.x'
+  buildConfiguration: 'production'
+  # Carpeta del proyecto Angular respecto a la raíz del repositorio (use 'Angular_Sitio_Estudiantes' si el repo es la carpeta padre).
+  projectPath: '.'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(nodeVersion)
+    displayName: 'Use Node.js'
+
+  - script: npm ci
+    displayName: 'npm ci'
+    workingDirectory: $(projectPath)
+
+  - script: npx ng version && npx ng build --configuration=$(buildConfiguration)
+    displayName: 'ng build'
+    workingDirectory: $(projectPath)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/$(projectPath)/dist'
+      ArtifactName: 'angular-dist'
+      publishLocation: 'Container'
+    displayName: 'Publicar dist/'
+    condition: succeeded()

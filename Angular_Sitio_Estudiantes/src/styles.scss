@@ -1,1 +1,78 @@
-/* You can add global styles to this file, and also import other style files */
+@use 'primeicons/primeicons.css';
+@use 'sweetalert2/dist/sweetalert2.min.css';
+
+:root {
+  --app-page-max: 120rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--p-font-family, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
+  color: var(--p-text-color, #0f172a);
+  background: var(--p-surface-50, #f8fafc);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* SweetAlert2: capa visual alineada con botones PrimeNG */
+.app-swal-popup {
+  border-radius: var(--p-content-border-radius, 10px) !important;
+  padding: 1.25rem 1.25rem 1rem !important;
+  box-shadow:
+    0 22px 45px -12px rgb(15 23 42 / 0.22),
+    0 0 0 1px rgb(15 23 42 / 0.04) !important;
+}
+
+.app-swal-title {
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.app-swal-html {
+  font-size: 0.95rem !important;
+  line-height: 1.45 !important;
+}
+
+.app-swal-confirm {
+  min-width: 6.5rem;
+}
+
+.app-swal-cancel,
+.app-swal-deny {
+  min-width: 5.5rem;
+}
+
+.app-swal-show {
+  animation: app-swal-in 0.22s ease-out both;
+}
+
+.app-swal-hide {
+  animation: app-swal-out 0.16s ease-in both;
+}
+
+@keyframes app-swal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes app-swal-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}

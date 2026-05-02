@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { ApiUrlService } from '../../core/services/api-url.service';
 
 export interface LoginRequest {
   nombreUsuario: string;
@@ -23,13 +24,14 @@ export interface LoginResponse {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly apiUrl = inject(ApiUrlService);
 
   private static readonly KEY_TOKEN_ACCESO = 'tokenAcceso';
   private static readonly KEY_TOKEN_RENOVACION = 'tokenRenovacion';
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>('/api/v1/Auth/login', credentials)
+      .post<LoginResponse>(this.apiUrl.v1('Auth/login'), credentials)
       .pipe(tap((res) => this.persistTokensIfOk(res)));
   }
 

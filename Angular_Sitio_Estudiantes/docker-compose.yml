@@ -1,0 +1,24 @@
+# Ejemplo: front SSR + proxy mental hacia API externa.
+# El API .NET suele ejecutarse aparte (p. ej. https://localhost:7020 en desarrollo).
+# En producción, configure apiBaseUrl vacío y enrute /api con un reverse proxy (ver deploy/nginx.conf.example).
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_CONFIGURATION: production
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+    # Si el API está en otro contenedor en la misma red:
+    # environment:
+    #   API_UPSTREAM: "http://api:8080"
+
+  # Descomenta si publicas el API .NET en el mismo compose:
+  # api:
+  #   image: tu-registro/servicios-estudiantes-api:latest
+  #   ports:
+  #     - "7020:7020"

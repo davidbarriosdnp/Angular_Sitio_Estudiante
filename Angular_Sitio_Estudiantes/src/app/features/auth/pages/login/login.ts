@@ -2,29 +2,33 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../auth.service';
+import { AlertService } from '../../../../core/services/alert.service';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CardModule, InputTextModule, PasswordModule, ButtonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly alerts = inject(AlertService);
 
   protected nombreUsuario = '';
   protected password = '';
-  protected errorMsg = '';
   protected loading = false;
 
   protected iniciarSesion(): void {
-    this.errorMsg = '';
     const u = this.nombreUsuario.trim();
     if (!u || !this.password) {
-      this.errorMsg = 'Usuario y contraseña son obligatorios.';
+      void this.alerts.warning('Ingrese usuario y contraseña.');
       return;
     }
 
@@ -34,10 +38,14 @@ export class LoginPage {
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (res) => {
-          if (res.operacionExitosa && res.resultado) void this.router.navigateByUrl('/inicio');
-          else this.errorMsg = res.mensaje || 'Credenciales inválidas.';
+          if (res.operacionExitosa && res.resultado) {
+            void this.router.navigateByUrl('/inicio');
+            this.alerts.successBrief('Bienvenido al portal.', 'Sesión iniciada');
+            return;
+          }
+          void this.alerts.error(res.mensaje || 'Credenciales inválidas.');
         },
-        error: () => (this.errorMsg = 'No se pudo contactar el servidor.'),
+        error: () => void this.alerts.error('No se pudo contactar el servidor.'),
       });
   }
 }

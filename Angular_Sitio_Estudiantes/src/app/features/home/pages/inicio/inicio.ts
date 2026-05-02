@@ -1,19 +1,13 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../auth/auth.service';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-inicio-page',
   standalone: true,
+  imports: [RouterLink, CardModule, ButtonModule],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',
 })
-export class InicioPage {
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-
-  protected cerrarSesion(): void {
-    this.auth.logout();
-    void this.router.navigateByUrl('/login');
-  }
-}
+export class InicioPage {}
