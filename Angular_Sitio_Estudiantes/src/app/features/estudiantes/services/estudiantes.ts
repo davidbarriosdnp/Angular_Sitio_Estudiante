@@ -24,6 +24,7 @@ export interface EstudianteDetalleDto {
   fechaRegistro: string;
   fechaModificacion: string | null;
   estado: number;
+  usuarioId: number | null;
 }
 
 export interface CrearEstudiantePayload {
@@ -66,4 +67,60 @@ export class Estudiantes {
   eliminar(id: number): Observable<ApiResponse<boolean>> {
     return this.http.delete<ApiResponse<boolean>>(this.api.v1(`Estudiantes/${id}`));
   }
+
+  /** Catálogo de materias del programa (mismo filtro que el API de Materias). */
+  catalogoMaterias(programaCreditoId: number | null, soloActivos = true): Observable<ApiResponse<MateriaCatalogoDto[]>> {
+    let params = new HttpParams().set('soloActivos', soloActivos);
+    if (programaCreditoId != null) {
+      params = params.set('programaCreditoId', programaCreditoId);
+    }
+    return this.http.get<ApiResponse<MateriaCatalogoDto[]>>(this.api.v1('Estudiantes/catalogo/materias'), { params });
+  }
+
+  inscripcion(estudianteId: number, soloActivas = true): Observable<ApiResponse<InscripcionEstudianteDto[]>> {
+    const params = new HttpParams().set('soloActivas', soloActivas);
+    return this.http.get<ApiResponse<InscripcionEstudianteDto[]>>(
+      this.api.v1(`Estudiantes/${estudianteId}/inscripcion`),
+      { params },
+    );
+  }
+
+  registrarInscripcion(estudianteId: number, body: InscripcionSolicitudPayload): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(this.api.v1(`Estudiantes/${estudianteId}/inscripcion`), body);
+  }
+
+  companeros(estudianteId: number, materiaId: number): Observable<ApiResponse<string[]>> {
+    return this.http.get<ApiResponse<string[]>>(
+      this.api.v1(`Estudiantes/${estudianteId}/materias/${materiaId}/companeros`),
+    );
+  }
+}
+
+export interface MateriaCatalogoDto {
+  materiaId: number;
+  nombre: string;
+  creditos: number;
+  profesorId: number;
+  programaCreditoId: number;
+  nombreProfesor: string;
+  fechaRegistro: string;
+  fechaModificacion: string | null;
+  estado: number;
+}
+
+export interface InscripcionEstudianteDto {
+  materiaId: number;
+  nombreMateria: string;
+  creditos: number;
+  profesorId: number;
+  nombreProfesor: string;
+  fechaRegistro: string;
+  fechaModificacion: string | null;
+  estado: number;
+}
+
+export interface InscripcionSolicitudPayload {
+  materiaId1: number;
+  materiaId2: number;
+  materiaId3: number;
 }

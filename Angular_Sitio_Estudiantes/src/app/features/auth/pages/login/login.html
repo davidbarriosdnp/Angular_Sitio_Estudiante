@@ -43,6 +43,23 @@
         [loading]="loading"
         [disabled]="loading"
       />
+
+      <aside class="login__enroll" aria-label="Registro e inscripción en línea">
+        <div class="login__enroll-inner">
+          <span class="login__enroll-icon pi pi-user-plus" aria-hidden="true"></span>
+          <div class="login__enroll-copy">
+            <p class="login__enroll-kicker">¿Aún no está registrado?</p>
+            <p class="login__enroll-text">
+              Use el <strong>registro en línea</strong> para crear su cuenta de estudiante, elegir un programa de créditos y vincular su expediente. Después podrá
+              acceder al portal e inscribir sus materias.
+            </p>
+            <a routerLink="/registro" class="login__enroll-cta">
+              Ir a registro e inscripción
+              <span class="pi pi-arrow-right login__enroll-cta-icon" aria-hidden="true"></span>
+            </a>
+          </div>
+        </div>
+      </aside>
     </form>
   </p-card>
 </div>

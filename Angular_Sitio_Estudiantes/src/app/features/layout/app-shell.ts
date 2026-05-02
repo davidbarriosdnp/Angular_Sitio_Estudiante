@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
@@ -13,28 +13,33 @@ import { AlertService } from '../../core/services/alert.service';
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
-export class AppShell {
+export class AppShell implements OnInit {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly alerts = inject(AlertService);
 
-  protected readonly navItems: MenuItem[] = [
-    {
-      label: 'Inicio',
-      icon: 'pi pi-home',
-      routerLink: '/inicio',
-    },
-    {
-      label: 'Estudiantes',
-      icon: 'pi pi-users',
-      routerLink: '/estudiantes',
-    },
-    {
-      label: 'Usuarios',
-      icon: 'pi pi-id-card',
-      routerLink: '/usuarios',
-    },
-  ];
+  /** Referencia estable (no getter) para evitar bucles de CD con p-menubar. */
+  protected navItems: MenuItem[] = [];
+
+  ngOnInit(): void {
+    const items: MenuItem[] = [{ label: 'Inicio', icon: 'pi pi-home', routerLink: '/inicio' }];
+    if (this.auth.puedeAccederModuloInscripcion()) {
+      items.push({ label: 'Mi inscripción', icon: 'pi pi-book', routerLink: '/mi-inscripcion' });
+    }
+    items.push({ label: 'Estudiantes', icon: 'pi pi-users', routerLink: '/estudiantes' });
+    if (this.auth.esAdministrador()) {
+      items.push({
+        label: 'Catálogo',
+        icon: 'pi pi-list',
+        items: [
+          { label: 'Programas de crédito', icon: 'pi pi-folder', routerLink: '/programas-credito' },
+          { label: 'Materias', icon: 'pi pi-bookmark', routerLink: '/materias' },
+          { label: 'Profesores', icon: 'pi pi-user', routerLink: '/profesores' },
+        ],
+      });
+      items.push({ label: 'Usuarios', icon: 'pi pi-id-card', routerLink: '/usuarios' });
+    }
+    this.navItems = items;
+  }
 
   protected async cerrarSesion(): Promise<void> {
     const r = await this.alerts.fire({
@@ -48,7 +53,6 @@ export class AppShell {
     });
     if (!r?.isConfirmed) return;
     this.auth.logout();
-    void this.router.navigateByUrl('/login');
     void this.alerts.info('Ha cerrado sesión correctamente.');
   }
 }

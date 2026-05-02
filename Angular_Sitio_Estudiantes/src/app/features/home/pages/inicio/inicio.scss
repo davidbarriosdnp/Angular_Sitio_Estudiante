@@ -28,6 +28,11 @@
   flex-direction: column;
 }
 
+.home__card--highlight {
+  outline: 1px solid color-mix(in srgb, var(--p-primary-400, #818cf8) 45%, transparent);
+  box-shadow: 0 1px 12px color-mix(in srgb, var(--p-primary-500, #6366f1) 12%, transparent);
+}
+
 .home__card-head {
   display: flex;
   align-items: center;
@@ -43,6 +48,20 @@
 
 .home__card-head--admin {
   background: linear-gradient(135deg, #0ea5e9, #0369a1);
+}
+
+.home__card-head--catalog {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.home__card-head--insc {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.home__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .home__card-title {

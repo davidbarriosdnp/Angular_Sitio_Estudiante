@@ -1,0 +1,156 @@
+<section class="page">
+  <div class="page__head">
+    <h1 class="page__title">Mi inscripción</h1>
+    <p class="page__subtitle">
+      @if (estudianteId != null) {
+        Elija exactamente 3 materias (9 créditos), sin repetir profesor. En cada clase solo verá los nombres de quienes comparten materia con usted.
+      } @else {
+        Inscripción a tres materias y consulta de compañeros por clase, cuando su expediente esté vinculado a esta cuenta.
+      }
+    </p>
+  </div>
+
+  @if (estudianteId == null) {
+    <p-card styleClass="sin-perfil">
+      <div class="sin-perfil__body">
+        <div class="sin-perfil__icon" aria-hidden="true">
+          <span class="pi pi-id-card"></span>
+        </div>
+        <h2 class="sin-perfil__title">Falta vincular su expediente académico</h2>
+        <p class="sin-perfil__lead">
+          Su sesión tiene rol de estudiante, pero esta cuenta aún no está asociada a un registro en el sistema académico (no aparece el identificador de
+          estudiante en su sesión). Sin ese vínculo no puede elegir materias ni ver compañeros.
+        </p>
+        <ul class="sin-perfil__list">
+          <li>
+            <strong>Registro en línea</strong> crea la cuenta y el expediente a la vez: es la vía recomendada para nuevos ingresos.
+          </li>
+          <li>
+            Si un administrador creó solo su usuario, debe pedirle que asocie su cuenta a un <strong>registro de estudiante</strong> en el sistema, o que use el alta
+            completa desde el módulo correspondiente.
+          </li>
+          <li>
+            Una vez vinculado, <strong>cierre sesión y vuelva a entrar</strong> para que su token incluya el identificador y habilitar la inscripción.
+          </li>
+        </ul>
+        <div class="sin-perfil__actions">
+          <p-button label="Ir a registro en línea" icon="pi pi-user-plus" (onClick)="irARegistroEnLinea()" />
+          <p-button label="Panel principal" icon="pi pi-home" severity="secondary" [outlined]="true" routerLink="/inicio" />
+          <p-button label="Directorio de estudiantes" icon="pi pi-users" severity="secondary" [outlined]="true" routerLink="/estudiantes" />
+        </div>
+      </div>
+    </p-card>
+  } @else if (cargando && !materias.length && !inscripciones.length) {
+    <div class="page__loading">
+      <p-progress-spinner strokeWidth="4" aria-label="Cargando" />
+    </div>
+  } @else {
+    <p-card header="Selección de materias" styleClass="block mb-4">
+      @if (yaInscritoCompleto) {
+        <p-message
+          severity="info"
+          text="Ya tiene 3 materias inscritas. Si necesita cambios, debe gestionarlos según las políticas del centro (API de fila/cambio)."
+        />
+      } @else {
+        <div class="grid-materias">
+          <div class="field">
+            <label class="field__label" for="m1">Materia 1</label>
+            <p-select
+              inputId="m1"
+              [(ngModel)]="materia1"
+              [options]="opcionesPara(1)"
+              optionLabel="nombre"
+              optionValue="materiaId"
+              placeholder="Elija materia"
+              [filter]="true"
+              filterPlaceholder="Buscar"
+              [disabled]="guardando"
+              (onChange)="onMateriaChange()"
+              styleClass="w-full"
+            />
+          </div>
+          <div class="field">
+            <label class="field__label" for="m2">Materia 2</label>
+            <p-select
+              inputId="m2"
+              [(ngModel)]="materia2"
+              [options]="opcionesPara(2)"
+              optionLabel="nombre"
+              optionValue="materiaId"
+              placeholder="Elija materia"
+              [filter]="true"
+              [disabled]="guardando"
+              (onChange)="onMateriaChange()"
+              styleClass="w-full"
+            />
+          </div>
+          <div class="field">
+            <label class="field__label" for="m3">Materia 3</label>
+            <p-select
+              inputId="m3"
+              [(ngModel)]="materia3"
+              [options]="opcionesPara(3)"
+              optionLabel="nombre"
+              optionValue="materiaId"
+              placeholder="Elija materia"
+              [filter]="true"
+              [disabled]="guardando"
+              (onChange)="onMateriaChange()"
+              styleClass="w-full"
+            />
+          </div>
+        </div>
+        <div class="form-actions">
+          <p-button
+            label="Registrar inscripción"
+            icon="pi pi-check"
+            [loading]="guardando"
+            [disabled]="guardando"
+            (onClick)="registrar()"
+          />
+        </div>
+      }
+    </p-card>
+
+    <p-card header="Mis materias inscritas" styleClass="block">
+      @if (!inscripciones.length) {
+        <p class="muted">Aún no tiene materias inscritas.</p>
+      } @else {
+        <p-table [value]="inscripciones" dataKey="materiaId" styleClass="p-datatable-sm">
+          <ng-template #header>
+            <tr>
+              <th>Materia</th>
+              <th>Créditos</th>
+              <th>Profesor</th>
+              <th style="width: 12rem">Compañeros (solo nombres)</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row>
+            <tr>
+              <td>{{ row.nombreMateria }}</td>
+              <td>{{ row.creditos }}</td>
+              <td>{{ row.nombreProfesor }}</td>
+              <td>
+                <p-button
+                  label="Ver nombres"
+                  icon="pi pi-users"
+                  severity="secondary"
+                  [outlined]="true"
+                  [loading]="cargandoCompaneros === row.materiaId"
+                  (onClick)="verCompaneros(row.materiaId)"
+                />
+                @if (nombresCompaneros(row.materiaId).length) {
+                  <ul class="companeros-list">
+                    @for (n of nombresCompaneros(row.materiaId); track n) {
+                      <li>{{ n }}</li>
+                    }
+                  </ul>
+                }
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
+  }
+</section>

@@ -1,0 +1,89 @@
+<div class="login">
+  <p-card styleClass="login__card login__card--wide">
+    <ng-template pTemplate="header">
+      <div class="login__hero">
+        <span class="login__icon pi pi-user-plus" aria-hidden="true"></span>
+        <div>
+          <h1 class="login__title">Registro en línea</h1>
+          <p class="login__lead">Cree su cuenta de estudiante y elija un programa de créditos</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <form class="login__form" (ngSubmit)="registrarse()">
+      <label class="login__field">
+        <span class="login__label">Programa de créditos</span>
+        <p-select
+          [(ngModel)]="programaCreditoId"
+          name="programaCreditoId"
+          [options]="programas"
+          optionLabel="nombre"
+          optionValue="programaCreditoId"
+          placeholder="Seleccione programa"
+          [disabled]="loading"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        />
+      </label>
+      <label class="login__field">
+        <span class="login__label">Nombre completo</span>
+        <input
+          pInputText
+          name="nombreCompleto"
+          [(ngModel)]="nombreCompleto"
+          autocomplete="name"
+          [disabled]="loading"
+          class="w-full"
+        />
+      </label>
+      <label class="login__field">
+        <span class="login__label">Usuario</span>
+        <input
+          pInputText
+          name="nombreUsuario"
+          [(ngModel)]="nombreUsuario"
+          autocomplete="username"
+          [disabled]="loading"
+          class="w-full"
+        />
+      </label>
+      <label class="login__field">
+        <span class="login__label">Correo</span>
+        <input
+          pInputText
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          autocomplete="email"
+          [disabled]="loading"
+          class="w-full"
+        />
+      </label>
+      <label class="login__field">
+        <span class="login__label">Contraseña</span>
+        <p-password
+          [(ngModel)]="password"
+          name="password"
+          [feedback]="true"
+          [toggleMask]="true"
+          [disabled]="loading"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          autocomplete="new-password"
+        />
+      </label>
+      <p-button
+        type="submit"
+        label="Registrarme"
+        icon="pi pi-check"
+        styleClass="w-full"
+        [loading]="loading"
+        [disabled]="loading"
+      />
+      <p class="login__footer">
+        ¿Ya tiene cuenta?
+        <a routerLink="/login" class="login__link">Iniciar sesión</a>
+      </p>
+    </form>
+  </p-card>
+</div>

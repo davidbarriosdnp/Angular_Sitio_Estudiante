@@ -28,6 +28,8 @@ export const appConfig: ApplicationConfig = {
     }),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
+    // Sin withFetch(): el backend XHR está parcheado por Zone.js y dispara CD al terminar HTTP.
+    // withFetch() puede resolver fuera de NgZone y dejar tablas/spinners hasta un evento (p. ej. mover el ratón).
     provideHttpClient(withInterceptors([authInterceptor])),
   ],
 };

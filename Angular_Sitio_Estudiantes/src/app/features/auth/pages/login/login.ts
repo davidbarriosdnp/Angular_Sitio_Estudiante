@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
@@ -12,7 +12,7 @@ import { AlertService } from '../../../../core/services/alert.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [FormsModule, CardModule, InputTextModule, PasswordModule, ButtonModule],
+  imports: [FormsModule, RouterLink, CardModule, InputTextModule, PasswordModule, ButtonModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

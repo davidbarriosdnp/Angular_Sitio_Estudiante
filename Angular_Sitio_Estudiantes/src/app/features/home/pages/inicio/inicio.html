@@ -2,11 +2,34 @@
   <header class="home__intro">
     <h1 class="home__title">Panel principal</h1>
     <p class="home__text">
-      Gestione estudiantes y, con permisos de administrador, las cuentas de usuario del sistema.
+      @if (auth.esAdministrador()) {
+        Gestión de catálogo, usuarios y registros académicos. Los estudiantes usan inscripción y el directorio según su rol.
+      } @else if (auth.esRolEstudiante()) {
+        Inscriba hasta tres materias con profesores distintos, consulte el directorio de estudiantes y vea solo los nombres de compañeros en cada clase.
+      } @else {
+        Consulte el directorio de estudiantes y las secciones habilitadas para su cuenta.
+      }
     </p>
   </header>
 
   <div class="home__grid">
+    @if (auth.puedeAccederModuloInscripcion()) {
+      <p-card styleClass="home__card home__card--highlight">
+        <ng-template pTemplate="header">
+          <div class="home__card-head home__card-head--insc">
+            <span class="pi pi-book" aria-hidden="true"></span>
+          </div>
+        </ng-template>
+        <h2 class="home__card-title">Mi inscripción</h2>
+        <p class="home__card-text">
+          Elija 3 materias (9 créditos), sin repetir profesor. Después podrá ver los nombres de compañeros por materia.
+        </p>
+        <ng-template pTemplate="footer">
+          <p-button label="Ir a inscripción" icon="pi pi-arrow-right" iconPos="right" routerLink="/mi-inscripcion" />
+        </ng-template>
+      </p-card>
+    }
+
     <p-card styleClass="home__card">
       <ng-template pTemplate="header">
         <div class="home__card-head home__card-head--students">
@@ -14,29 +37,54 @@
         </div>
       </ng-template>
       <h2 class="home__card-title">Estudiantes</h2>
-      <p class="home__card-text">Listado, creación, edición y baja lógica de registros académicos.</p>
+      <p class="home__card-text">
+        @if (auth.esAdministrador()) {
+          Directorio con alta, edición y baja lógica de expedientes.
+        } @else {
+          Directorio en línea: consulte registros de otros estudiantes según las políticas del portal.
+        }
+      </p>
       <ng-template pTemplate="footer">
         <p-button label="Ir a estudiantes" icon="pi pi-arrow-right" iconPos="right" routerLink="/estudiantes" />
       </ng-template>
     </p-card>
 
-    <p-card styleClass="home__card">
-      <ng-template pTemplate="header">
-        <div class="home__card-head home__card-head--admin">
-          <span class="pi pi-id-card" aria-hidden="true"></span>
-        </div>
-      </ng-template>
-      <h2 class="home__card-title">Usuarios</h2>
-      <p class="home__card-text">Administración de cuentas. Requiere rol administrador en la API.</p>
-      <ng-template pTemplate="footer">
-        <p-button
-          label="Ir a usuarios"
-          icon="pi pi-arrow-right"
-          iconPos="right"
-          severity="secondary"
-          routerLink="/usuarios"
-        />
-      </ng-template>
-    </p-card>
+    @if (auth.esAdministrador()) {
+      <p-card styleClass="home__card">
+        <ng-template pTemplate="header">
+          <div class="home__card-head home__card-head--admin">
+            <span class="pi pi-id-card" aria-hidden="true"></span>
+          </div>
+        </ng-template>
+        <h2 class="home__card-title">Usuarios</h2>
+        <p class="home__card-text">Administración de cuentas y roles en el sistema.</p>
+        <ng-template pTemplate="footer">
+          <p-button
+            label="Ir a usuarios"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            severity="secondary"
+            routerLink="/usuarios"
+          />
+        </ng-template>
+      </p-card>
+
+      <p-card styleClass="home__card">
+        <ng-template pTemplate="header">
+          <div class="home__card-head home__card-head--catalog">
+            <span class="pi pi-list" aria-hidden="true"></span>
+          </div>
+        </ng-template>
+        <h2 class="home__card-title">Catálogo académico</h2>
+        <p class="home__card-text">Programas de crédito, materias y profesores.</p>
+        <ng-template pTemplate="footer">
+          <div class="home__card-actions">
+            <p-button label="Programas" icon="pi pi-folder" routerLink="/programas-credito" />
+            <p-button label="Materias" icon="pi pi-bookmark" routerLink="/materias" severity="secondary" />
+            <p-button label="Profesores" icon="pi pi-user" routerLink="/profesores" [outlined]="true" />
+          </div>
+        </ng-template>
+      </p-card>
+    }
   </div>
 </section>

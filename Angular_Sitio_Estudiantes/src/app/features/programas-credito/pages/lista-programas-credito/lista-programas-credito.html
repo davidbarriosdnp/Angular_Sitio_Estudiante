@@ -1,0 +1,137 @@
+<section class="page">
+  <div class="page__head">
+    <h1 class="page__title">Programas de crédito</h1>
+    <p class="page__subtitle">Definición de créditos por materia y máximo de materias por estudiante.</p>
+  </div>
+
+  <p-toolbar class="page__toolbar">
+    <ng-template pTemplate="start">
+      <p-button label="Nuevo" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+      <p-button
+        label="Refrescar"
+        icon="pi pi-refresh"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="refrescar()"
+      />
+    </ng-template>
+    <ng-template pTemplate="end">
+      <p-button
+        [label]="soloActivos ? 'Solo activos' : 'Incluir inactivos'"
+        [icon]="soloActivos ? 'pi pi-filter' : 'pi pi-filter-slash'"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="toggleSoloActivos()"
+      />
+    </ng-template>
+  </p-toolbar>
+
+  <div class="page__table-wrap">
+    @if (cargando && !filas.length) {
+      <div class="page__loading">
+        <p-progress-spinner strokeWidth="4" aria-label="Cargando" />
+      </div>
+    } @else {
+      <p-table
+        [value]="filas"
+        [paginator]="true"
+        [rows]="10"
+        [loading]="cargando"
+        dataKey="programaCreditoId"
+        styleClass="p-datatable-sm"
+        [tableStyle]="{ 'min-width': '48rem' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th style="width: 5rem">ID</th>
+            <th>Nombre</th>
+            <th>Créd./mat.</th>
+            <th>Máx. mat.</th>
+            <th>Registro</th>
+            <th>Estado</th>
+            <th style="width: 9rem; text-align: right">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-row>
+          <tr>
+            <td>{{ row.programaCreditoId }}</td>
+            <td>{{ row.nombre }}</td>
+            <td>{{ row.creditosPorMateria }}</td>
+            <td>{{ row.maxMateriasPorEstudiante }}</td>
+            <td>{{ row.fechaRegistro | date: 'short' }}</td>
+            <td>
+              <p-tag
+                [value]="row.estado === 1 ? 'Activo' : 'Inactivo'"
+                [severity]="severidadEstado(row.estado)"
+              />
+            </td>
+            <td class="acciones">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [text]="true"
+                severity="secondary"
+                (onClick)="editar(row)"
+                aria-label="Editar"
+              />
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                [text]="true"
+                severity="danger"
+                (onClick)="eliminar(row)"
+                aria-label="Eliminar"
+              />
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="7">No hay programas para mostrar.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </div>
+</section>
+
+<p-dialog
+  [(visible)]="dialogoVisible"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(32rem, 95vw)' }"
+  [header]="modoEdicion ? 'Editar programa' : 'Nuevo programa'"
+>
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="guardar()">
+    <p-floatlabel>
+      <input pInputText id="pc-nombre" formControlName="nombre" class="w-full" />
+      <label for="pc-nombre">Nombre</label>
+    </p-floatlabel>
+    <div class="field">
+      <label class="field__label" for="pc-cred">Créditos por materia</label>
+      <p-inputnumber inputId="pc-cred" formControlName="creditosPorMateria" [min]="1" [max]="255" styleClass="w-full" />
+    </div>
+    <div class="field">
+      <label class="field__label" for="pc-max">Máximo materias por estudiante</label>
+      <p-inputnumber inputId="pc-max" formControlName="maxMateriasPorEstudiante" [min]="1" [max]="255" styleClass="w-full" />
+    </div>
+    @if (modoEdicion) {
+      <div class="field">
+        <label class="field__label" for="pc-est">Estado</label>
+        <p-select
+          inputId="pc-est"
+          formControlName="estado"
+          [options]="opcionesEstado"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full"
+        />
+      </div>
+    }
+    <div class="form-actions">
+      <p-button label="Cancelar" severity="secondary" type="button" [outlined]="true" (onClick)="dialogoVisible = false" />
+      <p-button [label]="modoEdicion ? 'Guardar' : 'Crear'" icon="pi pi-check" type="submit" [loading]="cargando" />
+    </div>
+  </form>
+</p-dialog>

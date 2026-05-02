@@ -12,6 +12,13 @@ function isAuthRoute(url: string, api: ApiUrlService): boolean {
   return url === api.v1('Auth/login') || url === api.v1('Auth/refresh');
 }
 
+/** No inyectar JWT en login/refresh ni en registro/catálogo públicos (evita sesiones viejas en alta en línea). */
+function debeInyectarTokenAcceso(url: string, api: ApiUrlService): boolean {
+  if (isAuthRoute(url, api)) return false;
+  if (url.includes('/Auth/registro') || url.includes('/Auth/programas')) return false;
+  return true;
+}
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const injector = inject(Injector);
   const backend = inject(HttpBackend);
@@ -24,7 +31,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let out = req;
   if (browser) {
     const access = localStorage.getItem(KEY_ACC);
-    if (access && !isAuthRoute(req.url, api) && !req.headers.has('Authorization')) {
+    if (access && debeInyectarTokenAcceso(req.url, api) && !req.headers.has('Authorization')) {
       out = req.clone({
         headers: req.headers.set('Authorization', `Bearer ${access}`),
       });
