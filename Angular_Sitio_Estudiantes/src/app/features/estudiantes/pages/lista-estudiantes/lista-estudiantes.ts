@@ -1,9 +1,10 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 
 import { AlertService } from '../../../../core/services/alert.service';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import { AuthService } from '../../../auth/auth.service';
 import {
   ActualizarEstudiantePayload,
@@ -50,6 +51,12 @@ export class ListaEstudiantesPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly alerts = inject(AlertService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly syncFinCarga = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.cargando = false;
+  });
 
   protected filas: EstudianteRegistroDto[] = [];
   protected programas: ProgramaCreditoDto[] = [];
@@ -104,7 +111,7 @@ export class ListaEstudiantesPage implements OnInit {
     this.cargando = true;
     this.estudiantesApi
       .getEstudiantes(this.soloActivos)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -144,7 +151,7 @@ export class ListaEstudiantesPage implements OnInit {
     this.cargando = true;
     this.estudiantesApi
       .getEstudiante(row.estudianteId)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa || !res.resultado) {
@@ -184,7 +191,7 @@ export class ListaEstudiantesPage implements OnInit {
       this.cargando = true;
       this.estudiantesApi
         .actualizar(this.estudianteEditId, payload)
-        .pipe(finalize(() => (this.cargando = false)))
+        .pipe(finalize(this.syncFinCarga))
         .subscribe({
           next: (res) => {
             if (!res.operacionExitosa) {
@@ -208,7 +215,7 @@ export class ListaEstudiantesPage implements OnInit {
     this.cargando = true;
     this.estudiantesApi
       .crear(crear)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -229,7 +236,7 @@ export class ListaEstudiantesPage implements OnInit {
     this.cargando = true;
     this.estudiantesApi
       .eliminar(row.estudianteId)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {

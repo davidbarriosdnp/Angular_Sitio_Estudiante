@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -20,10 +21,16 @@ export class LoginPage {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertService);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   protected nombreUsuario = '';
   protected password = '';
   protected loading = false;
+
+  private readonly finalizarSubmit = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.loading = false;
+  });
 
   protected iniciarSesion(): void {
     const u = this.nombreUsuario.trim();
@@ -35,7 +42,7 @@ export class LoginPage {
     this.loading = true;
     this.auth
       .login({ nombreUsuario: u, password: this.password })
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(this.finalizarSubmit))
       .subscribe({
         next: (res) => {
           if (res.operacionExitosa && res.resultado) {
@@ -45,7 +52,7 @@ export class LoginPage {
           }
           void this.alerts.error(res.mensaje || 'Credenciales inválidas.');
         },
-        error: () => void this.alerts.error('No se pudo contactar el servidor.'),
+        error: (err) => void this.alerts.apiError(err, 'No se pudo contactar el servidor.'),
       });
   }
 }

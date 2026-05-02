@@ -1,11 +1,12 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { forkJoin, finalize } from 'rxjs';
 
 import { AuthService } from '../../../auth/auth.service';
 import { estudianteIdDesdeToken } from '../../../../core/utils/jwt-payload';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import { AlertService } from '../../../../core/services/alert.service';
 import {
   Estudiantes,
@@ -44,6 +45,20 @@ export class MiInscripcionPage implements OnInit {
   private readonly estudiantesApi = inject(Estudiantes);
   private readonly alerts = inject(AlertService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly syncFinCargaLista = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.cargando = false;
+  });
+
+  private readonly syncFinGuardado = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.guardando = false;
+  });
+
+  private readonly syncFinCompanerosRow = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.cargandoCompaneros = null;
+  });
 
   protected estudianteId: number | null = null;
   protected programaId: number | null = null;
@@ -69,53 +84,48 @@ export class MiInscripcionPage implements OnInit {
 
   private cargarDatos(id: number): void {
     this.cargando = true;
-    this.estudiantesApi
-      .getEstudiante(id)
-      .pipe(finalize(() => (this.cargando = false)))
+    this.estudiantesApi.getEstudiante(id).subscribe({
+      next: (res) => {
+        if (!res.operacionExitosa || !res.resultado) {
+          void this.alerts.error(res.mensaje || 'No se pudo cargar su perfil.');
+          this.syncFinCargaLista();
+          return;
+        }
+        const pc = res.resultado.programaCreditoId;
+        this.programaId = pc > 0 ? pc : null;
+        this.refrescarCatalogoYInscripcion(id);
+      },
+      error: (e) => {
+        void this.alerts.apiError(e);
+        this.syncFinCargaLista();
+      },
+    });
+  }
+
+  /** Catálogo e inscripción en paralelo para menor espera que la cadena anterior. */
+  private refrescarCatalogoYInscripcion(id: number): void {
+    this.cargando = true;
+    forkJoin({
+      catalogo: this.estudiantesApi.catalogoMaterias(this.programaId, true),
+      inscripcion: this.estudiantesApi.inscripcion(id, true),
+    })
+      .pipe(finalize(() => this.syncFinCargaLista()))
       .subscribe({
-        next: (res) => {
-          if (!res.operacionExitosa || !res.resultado) {
-            void this.alerts.error(res.mensaje || 'No se pudo cargar su perfil.');
-            return;
+        next: ({ catalogo: rCat, inscripcion: rIns }) => {
+          if (rCat.operacionExitosa && rCat.resultado) {
+            this.materias = rCat.resultado;
+          } else {
+            this.materias = [];
+            void this.alerts.warning(rCat.mensaje || 'No se cargó el catálogo de materias.');
           }
-          const pc = res.resultado.programaCreditoId;
-          this.programaId = pc > 0 ? pc : null;
-          this.refrescarCatalogoYInscripcion(id);
+          if (rIns.operacionExitosa && rIns.resultado) {
+            this.inscripciones = rIns.resultado;
+          } else {
+            this.inscripciones = [];
+          }
         },
         error: (e) => void this.alerts.apiError(e),
       });
-  }
-
-  private refrescarCatalogoYInscripcion(id: number): void {
-    this.cargando = true;
-    this.estudiantesApi.catalogoMaterias(this.programaId, true).subscribe({
-      next: (rCat) => {
-        if (rCat.operacionExitosa && rCat.resultado) {
-          this.materias = rCat.resultado;
-        } else {
-          this.materias = [];
-          void this.alerts.warning(rCat.mensaje || 'No se cargó el catálogo de materias.');
-        }
-        this.estudiantesApi.inscripcion(id, true).subscribe({
-          next: (rIns) => {
-            this.cargando = false;
-            if (rIns.operacionExitosa && rIns.resultado) {
-              this.inscripciones = rIns.resultado;
-            } else {
-              this.inscripciones = [];
-            }
-          },
-          error: (e) => {
-            this.cargando = false;
-            void this.alerts.apiError(e);
-          },
-        });
-      },
-      error: (e) => {
-        this.cargando = false;
-        void this.alerts.apiError(e);
-      },
-    });
   }
 
   protected get yaInscritoCompleto(): boolean {
@@ -128,8 +138,8 @@ export class MiInscripcionPage implements OnInit {
     const idx = slot - 1;
     const current = sel[idx];
     const otherIds = sel
-      .map((id, i) => (i !== idx && id != null ? id : null))
-      .filter((id): id is number => id != null);
+      .map((sid, i) => (i !== idx && sid != null ? sid : null))
+      .filter((sid): sid is number => sid != null);
     const otherProfs = new Set<number>();
     for (let i = 0; i < 3; i++) {
       if (i === idx) continue;
@@ -174,7 +184,7 @@ export class MiInscripcionPage implements OnInit {
         materiaId2: this.materia2,
         materiaId3: this.materia3,
       })
-      .pipe(finalize(() => (this.guardando = false)))
+      .pipe(finalize(() => this.syncFinGuardado()))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -194,20 +204,19 @@ export class MiInscripcionPage implements OnInit {
   protected verCompaneros(materiaId: number): void {
     if (this.estudianteId == null) return;
     this.cargandoCompaneros = materiaId;
-    this.estudiantesApi.companeros(this.estudianteId, materiaId).subscribe({
-      next: (res) => {
-        this.cargandoCompaneros = null;
-        if (!res.operacionExitosa) {
-          void this.alerts.warning(res.mensaje || 'No se pudieron cargar los compañeros.');
-          return;
-        }
-        this.companerosPorMateria.set(materiaId, res.resultado ?? []);
-      },
-      error: (e) => {
-        this.cargandoCompaneros = null;
-        void this.alerts.apiError(e);
-      },
-    });
+    this.estudiantesApi
+      .companeros(this.estudianteId, materiaId)
+      .pipe(finalize(() => this.syncFinCompanerosRow()))
+      .subscribe({
+        next: (res) => {
+          if (!res.operacionExitosa) {
+            void this.alerts.warning(res.mensaje || 'No se pudieron cargar los compañeros.');
+            return;
+          }
+          this.companerosPorMateria.set(materiaId, res.resultado ?? []);
+        },
+        error: (e) => void this.alerts.apiError(e),
+      });
   }
 
   protected nombresCompaneros(materiaId: number): string[] {

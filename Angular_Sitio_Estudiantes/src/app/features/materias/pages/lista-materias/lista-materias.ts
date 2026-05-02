@@ -1,9 +1,10 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 
 import { AlertService } from '../../../../core/services/alert.service';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import { ProgramaCreditoDto, ProgramasCreditoService } from '../../../catalogos/programas-credito.service';
 import {
   ActualizarMateriaPayload,
@@ -50,6 +51,12 @@ export class ListaMateriasPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly alerts = inject(AlertService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly syncFinCarga = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.cargando = false;
+  });
 
   protected filas: MateriaDetalleDto[] = [];
   protected programas: ProgramaCreditoDto[] = [];
@@ -110,7 +117,7 @@ export class ListaMateriasPage implements OnInit {
     this.cargando = true;
     this.api
       .listar(this.filtroProgramaId, this.soloActivos)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -184,7 +191,7 @@ export class ListaMateriasPage implements OnInit {
       this.cargando = true;
       this.api
         .actualizar(this.editId, payload)
-        .pipe(finalize(() => (this.cargando = false)))
+        .pipe(finalize(this.syncFinCarga))
         .subscribe({
           next: (res) => {
             if (!res.operacionExitosa) {
@@ -208,7 +215,7 @@ export class ListaMateriasPage implements OnInit {
     this.cargando = true;
     this.api
       .crear(crear)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -229,7 +236,7 @@ export class ListaMateriasPage implements OnInit {
     this.cargando = true;
     this.api
       .eliminar(row.materiaId)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {

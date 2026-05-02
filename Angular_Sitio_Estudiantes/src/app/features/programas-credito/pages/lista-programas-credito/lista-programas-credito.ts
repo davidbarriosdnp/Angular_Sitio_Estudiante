@@ -1,9 +1,10 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 
 import { AlertService } from '../../../../core/services/alert.service';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import {
   ActualizarProgramaPayload,
   CrearProgramaPayload,
@@ -47,6 +48,12 @@ export class ListaProgramasCreditoPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly alerts = inject(AlertService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly syncFinCarga = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.cargando = false;
+  });
 
   protected filas: ProgramaCreditoDto[] = [];
   protected cargando = false;
@@ -76,7 +83,7 @@ export class ListaProgramasCreditoPage implements OnInit {
     this.cargando = true;
     this.api
       .listar(this.soloActivos)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -139,7 +146,7 @@ export class ListaProgramasCreditoPage implements OnInit {
       this.cargando = true;
       this.api
         .actualizar(this.editId, payload)
-        .pipe(finalize(() => (this.cargando = false)))
+        .pipe(finalize(this.syncFinCarga))
         .subscribe({
           next: (res) => {
             if (!res.operacionExitosa) {
@@ -162,7 +169,7 @@ export class ListaProgramasCreditoPage implements OnInit {
     this.cargando = true;
     this.api
       .crear(crear)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {
@@ -183,7 +190,7 @@ export class ListaProgramasCreditoPage implements OnInit {
     this.cargando = true;
     this.api
       .eliminar(row.programaCreditoId)
-      .pipe(finalize(() => (this.cargando = false)))
+      .pipe(finalize(this.syncFinCarga))
       .subscribe({
         next: (res) => {
           if (!res.operacionExitosa) {

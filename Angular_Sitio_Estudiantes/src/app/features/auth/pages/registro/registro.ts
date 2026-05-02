@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -10,6 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { AuthService } from '../../auth.service';
 import { AlertService } from '../../../../core/services/alert.service';
+import { finalizeHttpUiPatch } from '../../../../core/utils/sync-ui-after-http';
 import { ProgramaCreditoDto } from '../../../catalogos/programas-credito.service';
 
 @Component({
@@ -33,6 +34,12 @@ export class RegistroPage implements OnInit {
   private readonly router = inject(Router);
   private readonly alerts = inject(AlertService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly finalizarSubmit = finalizeHttpUiPatch(this.ngZone, this.cdr, () => {
+    this.loading = false;
+  });
 
   protected nombreUsuario = '';
   protected email = '';
@@ -74,7 +81,7 @@ export class RegistroPage implements OnInit {
         nombreCompleto: nom,
         programaCreditoId: this.programaCreditoId,
       })
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(finalize(this.finalizarSubmit))
       .subscribe({
         next: (res) => {
           if (res.operacionExitosa && res.resultado) {
