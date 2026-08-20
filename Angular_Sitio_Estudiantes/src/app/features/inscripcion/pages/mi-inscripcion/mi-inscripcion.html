@@ -58,13 +58,26 @@
         </div>
       </ng-template>
 
-      @if (yaInscritoCompleto) {
+      @if (periodoCerradoManual && !yaInscritoCompleto) {
+        <div class="inscripcion-completada-banner banner-warning">
+          <div class="inscripcion-completada-banner__icon text-amber">
+            <i class="pi pi-lock"></i>
+          </div>
+          <div class="inscripcion-completada-banner__text">
+            <h3>Periodo de inscripción cerrado voluntariamente</h3>
+            <p>Usted ha cerrado su ventana de inscripción con <strong>{{ totalCreditosInscritos }} créditos inscritos</strong>.</p>
+            <div class="mt-2">
+              <p-button label="Reabrir ventana de inscripción" icon="pi pi-lock-open" severity="warn" size="small" (onClick)="reabrirInscripcion()" />
+            </div>
+          </div>
+        </div>
+      } @else if (yaInscritoCompleto) {
         <div class="inscripcion-completada-banner">
           <div class="inscripcion-completada-banner__icon">
             <i class="pi pi-check-circle"></i>
           </div>
           <div class="inscripcion-completada-banner__text">
-            <h3>¡Inscripción registrada con éxito!</h3>
+            <h3>¡Inscripción completada con éxito!</h3>
             <p>Ya tiene el máximo de 3 materias (9 créditos) inscritas en este periodo académico. Si requiere cambios, consulte con gestión académica.</p>
           </div>
         </div>

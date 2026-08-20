@@ -91,7 +91,7 @@
   }
 }
 
-/* Banner de inscripción completada */
+/* Banner de inscripción completada / cerrada */
 .inscripcion-completada-banner {
   display: flex;
   align-items: flex-start;
@@ -101,11 +101,25 @@
   border: 1px solid #bbf7d0;
   border-radius: 10px;
   color: #166534;
+
+  &.banner-warning {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
+
+    p {
+      color: #b45309 !important;
+    }
+  }
 }
 
 .inscripcion-completada-banner__icon {
   font-size: 1.75rem;
   color: #22c55e;
+
+  &.text-amber {
+    color: #d97706 !important;
+  }
 }
 
 .inscripcion-completada-banner__text h3 {

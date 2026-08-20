@@ -67,17 +67,14 @@ export class MiInscripcionPage implements OnInit {
   protected cargando = false;
   protected guardando = false;
 
-  protected materiasSeleccionadasIds: number[] = [];
-  protected materiaSeleccionadaTemp: number | null = null;
-
-  protected companerosPorMateria = new Map<number, string[]>();
-  protected cargandoCompaneros: number | null = null;
+  protected periodoCerradoManual = false;
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const id = estudianteIdDesdeToken(this.auth.getToken());
     this.estudianteId = id;
     if (id == null) return;
+    this.periodoCerradoManual = localStorage.getItem('periodoCerrado_' + id) === 'true';
     this.cargarDatos(id);
   }
 
@@ -139,8 +136,12 @@ export class MiInscripcionPage implements OnInit {
     return this.inscripciones.length >= 3 || this.totalCreditosInscritos >= 9;
   }
 
+  protected get inscripcionCerradaDefinitiva(): boolean {
+    return this.yaInscritoCompleto || this.periodoCerradoManual;
+  }
+
   protected get alcanzolimiteSeleccion(): boolean {
-    return this.totalMateriasContadas >= 3 || this.totalCreditosAcumulados >= 9;
+    return this.totalMateriasContadas >= 3 || this.totalCreditosAcumulados >= 9 || this.periodoCerradoManual;
   }
 
   /** Objetos completos de materias seleccionadas actualmente en tarjetas locales. */
@@ -219,13 +220,59 @@ export class MiInscripcionPage implements OnInit {
     this.companerosPorMateria.clear();
   }
 
-  protected registrar(): void {
+  /** Muestra la alerta de confirmación previa antes de registrar en el backend. */
+  protected async registrar(): Promise<void> {
     if (this.estudianteId == null) return;
     
     if (this.materiasSeleccionadasIds.length === 0) {
       void this.alerts.warning('Seleccione al menos una materia para inscribir.');
       return;
     }
+
+    const numNuevas = this.materiasSeleccionadasIds.length;
+    const creditosNuevos = this.totalCreditosSeleccionados;
+    const totalFinalMaterias = this.totalMateriasContadas;
+    const totalFinalCreditos = this.totalCreditosAcumulados;
+
+    // Caso 1: Se completa el máximo de 3 materias o 9 créditos
+    if (totalFinalMaterias === 3 || totalFinalCreditos === 9) {
+      const res = await this.alerts.fire({
+        title: '¿Confirmar inscripción completa?',
+        html: `Está a punto de inscribir <strong>${numNuevas} materia(s) (${creditosNuevos} créditos)</strong> para completar los <strong>9 créditos</strong> del periodo.<br><br>¿Desea proceder?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, confirmar e inscribir',
+        cancelButtonText: 'Cancelar',
+      });
+
+      if (res?.isConfirmed) {
+        this.ejecutarRegistro(false);
+      }
+      return;
+    }
+
+    // Caso 2: Inscripción parcial (3 o 6 créditos en total)
+    const res = await this.alerts.fire({
+      title: '¿Confirmar inscripción parcial?',
+      html: `Inscribirá <strong>${numNuevas} materia(s) (${creditosNuevos} créditos)</strong>. Acumulará <strong>${totalFinalCreditos} de 9 créditos</strong>.<br><br>` +
+            `¿Desea dejar <strong>ABIERTA</strong> su ventana para agregar más materias después, o <strong>CERRAR</strong> su periodo académico?`,
+      icon: 'question',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: '🟢 Inscribir y dejar abierta',
+      denyButtonText: '🔒 Inscribir y cerrar periodo',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (res?.isConfirmed) {
+      this.ejecutarRegistro(false);
+    } else if (res?.isDenied) {
+      this.ejecutarRegistro(true);
+    }
+  }
+
+  private ejecutarRegistro(cerrarPeriodo: boolean): void {
+    if (this.estudianteId == null) return;
 
     const id1 = this.materiasSeleccionadasIds[0] ?? null;
     const id2 = this.materiasSeleccionadasIds[1] ?? null;
@@ -245,7 +292,15 @@ export class MiInscripcionPage implements OnInit {
             void this.alerts.error(res.mensaje || 'No se pudo registrar la inscripción.');
             return;
           }
-          void this.alerts.success(res.mensaje || 'Inscripción registrada con éxito.');
+
+          if (cerrarPeriodo && this.estudianteId != null) {
+            this.periodoCerradoManual = true;
+            localStorage.setItem('periodoCerrado_' + this.estudianteId, 'true');
+            void this.alerts.success('Inscripción registrada. Su periodo académico ha sido cerrado.');
+          } else {
+            void this.alerts.success('Inscripción registrada con éxito. Su ventana permanece abierta para agregar materias más adelante.');
+          }
+
           this.materiasSeleccionadasIds = [];
           this.materiaSeleccionadaTemp = null;
           this.companerosPorMateria.clear();
@@ -254,6 +309,23 @@ export class MiInscripcionPage implements OnInit {
         },
         error: (e) => void this.alerts.apiError(e),
       });
+  }
+
+  protected async reabrirInscripcion(): Promise<void> {
+    const res = await this.alerts.fire({
+      title: '¿Reabrir periodo de inscripción?',
+      html: '¿Desea reabrir su ventana de inscripción para poder seleccionar materias restantes?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, reabrir ventana',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (res?.isConfirmed && this.estudianteId != null) {
+      this.periodoCerradoManual = false;
+      localStorage.removeItem('periodoCerrado_' + this.estudianteId);
+      void this.alerts.success('Ventana de inscripción reabierta.');
+    }
   }
 
   protected verCompaneros(materiaId: number): void {
