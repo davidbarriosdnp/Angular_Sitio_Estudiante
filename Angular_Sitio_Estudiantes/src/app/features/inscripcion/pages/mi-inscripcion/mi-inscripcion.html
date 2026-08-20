@@ -50,9 +50,9 @@
             <span>Selección de materias</span>
           </div>
           @if (!yaInscritoCompleto) {
-            <div class="badge-status" [class.badge-status--complete]="totalCreditosSeleccionados === 9">
+            <div class="badge-status" [class.badge-status--complete]="totalCreditosAcumulados === 9">
               <i class="pi pi-bookmark"></i>
-              <span>{{ totalCreditosSeleccionados }} / 9 Créditos</span>
+              <span>{{ totalCreditosAcumulados }} / 9 Créditos</span>
             </div>
           }
         </div>
@@ -65,22 +65,22 @@
           </div>
           <div class="inscripcion-completada-banner__text">
             <h3>¡Inscripción registrada con éxito!</h3>
-            <p>Ya tiene el máximo de 3 materias (9 créditos) inscritas para este periodo académico. Si requiere cambios, consulte con coordinación académica.</p>
+            <p>Ya tiene el máximo de 3 materias (9 créditos) inscritas en este periodo académico. Si requiere cambios, consulte con gestión académica.</p>
           </div>
         </div>
       } @else {
         <!-- BARRA DE RESUMEN Y REGLAS UX -->
         <div class="summary-bar">
           <div class="summary-item">
-            <span class="summary-item__label">Materias elegidas</span>
+            <span class="summary-item__label">Materias acumuladas</span>
             <div class="summary-item__value">
-              <strong>{{ materiasSeleccionadasObjs.length }}</strong> <small>/ 3</small>
+              <strong>{{ totalMateriasContadas }}</strong> <small>/ 3</small>
             </div>
           </div>
           <div class="summary-item">
             <span class="summary-item__label">Total créditos</span>
             <div class="summary-item__value">
-              <strong [class.text-success]="totalCreditosSeleccionados > 0">{{ totalCreditosSeleccionados }}</strong> <small>/ 9 cr.</small>
+              <strong [class.text-success]="totalCreditosAcumulados > 0">{{ totalCreditosAcumulados }}</strong> <small>/ 9 cr.</small>
             </div>
           </div>
           <div class="summary-item">
@@ -93,7 +93,7 @@
         </div>
 
         <div class="credit-progress-bar">
-          <div class="credit-progress-bar__fill" [style.width.%]="(totalCreditosSeleccionados / 9) * 100"></div>
+          <div class="credit-progress-bar__fill" [style.width.%]="(totalCreditosAcumulados / 9) * 100"></div>
         </div>
 
         <!-- SELECTOR ÚNICO DE MATERIAS -->
@@ -107,10 +107,10 @@
             [options]="opcionesDisponibles"
             optionLabel="nombre"
             optionValue="materiaId"
-            [placeholder]="materiasSeleccionadasIds.length >= 3 ? '🔒 Límite de 3 materias alcanzado (9/9 cr)' : '➕ Seleccione una materia para agregar a su lista...'"
+            [placeholder]="alcanzolimiteSeleccion ? '🔒 Límite de 9 créditos / 3 materias alcanzado' : '➕ Seleccione una materia para agregar a su lista...'"
             [filter]="true"
             filterPlaceholder="Buscar por materia o nombre de profesor..."
-            [disabled]="guardando || materiasSeleccionadasIds.length >= 3"
+            [disabled]="guardando || alcanzolimiteSeleccion"
             (onChange)="agregarMateria($event.value)"
             [showClear]="false"
             styleClass="w-full select-custom-lg"
@@ -125,9 +125,9 @@
               </div>
             </ng-template>
           </p-select>
-          @if (materiasSeleccionadasIds.length < 3) {
+          @if (!alcanzolimiteSeleccion) {
             <small class="text-muted block mt-1">
-              <i class="pi pi-info-circle mr-1"></i> Las materias del mismo profesor se ocultan automáticamente para evitar duplicados.
+              <i class="pi pi-info-circle mr-1"></i> Se filtran automáticamente materias inscritas abajo, duplicadas o del mismo profesor.
             </small>
           }
         </div>

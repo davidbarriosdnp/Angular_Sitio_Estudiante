@@ -127,23 +127,53 @@ export class MiInscripcionPage implements OnInit {
       });
   }
 
-  protected get yaInscritoCompleto(): boolean {
-    return this.inscripciones.length >= 3;
+  protected get totalMateriasContadas(): number {
+    return this.inscripciones.length + this.materiasSeleccionadasIds.length;
   }
 
-  /** Objetos completos de materias seleccionadas actualmente. */
+  protected get totalCreditosAcumulados(): number {
+    return this.totalCreditosInscritos + this.totalCreditosSeleccionados;
+  }
+
+  protected get yaInscritoCompleto(): boolean {
+    return this.inscripciones.length >= 3 || this.totalCreditosInscritos >= 9;
+  }
+
+  protected get alcanzolimiteSeleccion(): boolean {
+    return this.totalMateriasContadas >= 3 || this.totalCreditosAcumulados >= 9;
+  }
+
+  /** Objetos completos de materias seleccionadas actualmente en tarjetas locales. */
   protected get materiasSeleccionadasObjs(): MateriaCatalogoDto[] {
     return this.materiasSeleccionadasIds
       .map((id) => this.materias.find((m) => m.materiaId === id))
       .filter((m): m is MateriaCatalogoDto => m != null);
   }
 
-  /** Materias disponibles para agregar: sin repetir materia y sin repetir profesor. */
+  /** Materias disponibles para agregar:
+   * 1. No estar inscrita previamente en la Base de Datos.
+   * 2. No estar seleccionada localmente en las tarjetas.
+   * 3. No repetir profesor con materias inscritas en BD ni seleccionadas localmente.
+   * 4. Que sus créditos no hagan superar el límite estricto de 9 créditos en total.
+   */
   protected get opcionesDisponibles(): MateriaCatalogoDto[] {
-    const selectedProfs = new Set(this.materiasSeleccionadasObjs.map((m) => m.profesorId));
+    if (this.alcanzolimiteSeleccion) return [];
+
+    const inscritasIds = new Set(this.inscripciones.map((i) => i.materiaId));
+    const seleccionadasIds = new Set(this.materiasSeleccionadasIds);
+
+    const profesoresOcupados = new Set<number>([
+      ...this.inscripciones.map((i) => i.profesorId),
+      ...this.materiasSeleccionadasObjs.map((m) => m.profesorId),
+    ]);
+
+    const creditosDisponibles = 9 - this.totalCreditosAcumulados;
+
     return this.materias.filter((row) => {
-      if (this.materiasSeleccionadasIds.includes(row.materiaId)) return false;
-      if (selectedProfs.has(row.profesorId)) return false;
+      if (inscritasIds.has(row.materiaId)) return false;
+      if (seleccionadasIds.has(row.materiaId)) return false;
+      if (profesoresOcupados.has(row.profesorId)) return false;
+      if ((row.creditos || 3) > creditosDisponibles) return false;
       return true;
     });
   }
@@ -151,14 +181,28 @@ export class MiInscripcionPage implements OnInit {
   /** Agrega la materia elegida en el selector único a las tarjetas seleccionadas. */
   protected agregarMateria(materiaId: number | null): void {
     if (materiaId == null) return;
-    if (this.materiasSeleccionadasIds.length >= 3) {
-      void this.alerts.warning('Solo puede seleccionar hasta 3 materias (9 créditos máximo).');
+
+    if (this.totalMateriasContadas >= 3) {
+      void this.alerts.warning('Ha alcanzado el límite máximo de 3 materias entre inscritas y seleccionadas.');
       setTimeout(() => {
         this.materiaSeleccionadaTemp = null;
         this.cdr.markForCheck();
       }, 0);
       return;
     }
+
+    const materiaObj = this.materias.find((m) => m.materiaId === materiaId);
+    const creditosMateria = materiaObj ? (materiaObj.creditos || 3) : 3;
+
+    if (this.totalCreditosAcumulados + creditosMateria > 9) {
+      void this.alerts.warning(`No puede agregar esta materia porque superaría el máximo de 9 créditos (tendría ${this.totalCreditosAcumulados + creditosMateria} cr).`);
+      setTimeout(() => {
+        this.materiaSeleccionadaTemp = null;
+        this.cdr.markForCheck();
+      }, 0);
+      return;
+    }
+
     if (!this.materiasSeleccionadasIds.includes(materiaId)) {
       this.materiasSeleccionadasIds.push(materiaId);
     }
