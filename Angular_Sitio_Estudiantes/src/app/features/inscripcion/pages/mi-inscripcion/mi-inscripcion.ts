@@ -233,6 +233,32 @@ export class MiInscripcionPage implements OnInit {
     return this.companerosPorMateria.get(materiaId) ?? [];
   }
 
+  protected get materia1Obj(): MateriaCatalogoDto | undefined {
+    return this.materias.find((m) => m.materiaId === this.materia1);
+  }
+
+  protected get materia2Obj(): MateriaCatalogoDto | undefined {
+    return this.materias.find((m) => m.materiaId === this.materia2);
+  }
+
+  protected get materia3Obj(): MateriaCatalogoDto | undefined {
+    return this.materias.find((m) => m.materiaId === this.materia3);
+  }
+
+  protected get materiasSeleccionadas(): MateriaCatalogoDto[] {
+    return [this.materia1Obj, this.materia2Obj, this.materia3Obj].filter(
+      (m): m is MateriaCatalogoDto => m != null
+    );
+  }
+
+  protected get totalCreditosSeleccionados(): number {
+    return this.materiasSeleccionadas.reduce((acc, m) => acc + (m.creditos || 3), 0);
+  }
+
+  protected get totalCreditosInscritos(): number {
+    return this.inscripciones.reduce((acc, m) => acc + (m.creditos || 3), 0);
+  }
+
   /** Cierra sesión y abre el registro público (usuario + expediente académico). */
   protected irARegistroEnLinea(): void {
     this.auth.logoutEIrA('/registro');
