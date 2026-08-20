@@ -112,7 +112,7 @@
         <!-- SELECTOR ÚNICO DE MATERIAS -->
         <div class="single-select-container mb-4">
           <label class="field__label mb-2" for="select-materia">
-            <i class="pi pi-search text-primary"></i> Buscar y agregar materia
+            <i class="pi pi-list text-primary"></i> Seleccione las asignaturas de su preferencia
           </label>
           <p-select
             inputId="select-materia"
@@ -120,9 +120,9 @@
             [options]="opcionesDisponibles"
             optionLabel="nombre"
             optionValue="materiaId"
-            [placeholder]="alcanzolimiteSeleccion ? '🔒 Límite de 9 créditos / 3 materias alcanzado' : '➕ Seleccione una materia para agregar a su lista...'"
+            [placeholder]="alcanzolimiteSeleccion ? '🔒 Límite de 9 créditos / 3 materias alcanzado' : '➕ Despliegue para ver las opciones disponibles...'"
             [filter]="true"
-            filterPlaceholder="Buscar por materia o nombre de profesor..."
+            filterPlaceholder="Buscar por nombre de materia o profesor..."
             [disabled]="guardando || alcanzolimiteSeleccion"
             (onChange)="agregarMateria($event.value)"
             [showClear]="false"
@@ -138,11 +138,6 @@
               </div>
             </ng-template>
           </p-select>
-          @if (!alcanzolimiteSeleccion) {
-            <small class="text-muted block mt-1">
-              <i class="pi pi-info-circle mr-1"></i> Se filtran automáticamente materias inscritas abajo, duplicadas o del mismo profesor.
-            </small>
-          }
         </div>
 
         <!-- CUADRÍCULA DE TARJETAS DE MATERIAS SELECCIONADAS -->
