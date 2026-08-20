@@ -67,6 +67,12 @@ export class MiInscripcionPage implements OnInit {
   protected cargando = false;
   protected guardando = false;
 
+  protected materiasSeleccionadasIds: number[] = [];
+  protected materiaSeleccionadaTemp: number | null = null;
+
+  protected companerosPorMateria = new Map<number, string[]>();
+  protected cargandoCompaneros: number | null = null;
+
   protected periodoCerradoManual = false;
 
   ngOnInit(): void {
