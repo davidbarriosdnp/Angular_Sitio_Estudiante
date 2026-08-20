@@ -72,9 +72,9 @@
         <!-- BARRA DE RESUMEN Y REGLAS UX -->
         <div class="summary-bar">
           <div class="summary-item">
-            <span class="summary-item__label">Materias seleccionadas</span>
+            <span class="summary-item__label">Materias elegidas</span>
             <div class="summary-item__value">
-              <strong>{{ materiasSeleccionadas.length }}</strong> <small>/ 3</small>
+              <strong>{{ materiasSeleccionadasObjs.length }}</strong> <small>/ 3</small>
             </div>
           </div>
           <div class="summary-item">
@@ -96,148 +96,82 @@
           <div class="credit-progress-bar__fill" [style.width.%]="(totalCreditosSeleccionados / 9) * 100"></div>
         </div>
 
-        <!-- FORMULARIO CON VISTA PREVIA INTERACTIVA -->
-        <div class="grid-materias">
-          <!-- MATERIA 1 -->
-          <div class="field-container">
-            <label class="field__label" for="m1">
-              <span class="field__number">1</span> Materia 1
-            </label>
-            <p-select
-              inputId="m1"
-              [(ngModel)]="materia1"
-              [options]="opcionesPara(1)"
-              optionLabel="nombre"
-              optionValue="materiaId"
-              placeholder="🔍 Seleccione primera materia"
-              [filter]="true"
-              filterPlaceholder="Buscar por nombre o profesor..."
-              [disabled]="guardando"
-              (onChange)="onMateriaChange()"
-              [showClear]="true"
-              styleClass="w-full select-custom"
-            >
-              <ng-template #item let-item>
-                <div class="select-option-rich">
-                  <div class="select-option-rich__title">{{ item.nombre }}</div>
-                  <div class="select-option-rich__meta">
-                    <span class="meta-tag meta-tag--profesor"><i class="pi pi-user"></i> {{ item.nombreProfesor }}</span>
-                    <span class="meta-tag meta-tag--creditos"><i class="pi pi-bookmark"></i> {{ item.creditos }} cr.</span>
-                  </div>
-                </div>
-              </ng-template>
-            </p-select>
-
-            <!-- TARJETA DETALLE MATERIA 1 -->
-            @if (materia1Obj) {
-              <div class="materia-card-preview fade-in">
-                <div class="materia-card-preview__body">
-                  <div class="materia-card-preview__top">
-                    <h4 class="materia-card-preview__name">{{ materia1Obj.nombre }}</h4>
-                    <span class="badge-credit">{{ materia1Obj.creditos }} cr</span>
-                  </div>
-                  <div class="materia-card-preview__profesor">
-                    <i class="pi pi-user"></i>
-                    <span>Prof: <strong>{{ materia1Obj.nombreProfesor }}</strong></span>
-                  </div>
+        <!-- SELECTOR ÚNICO DE MATERIAS -->
+        <div class="single-select-container mb-4">
+          <label class="field__label mb-2" for="select-materia">
+            <i class="pi pi-search text-primary"></i> Buscar y agregar materia
+          </label>
+          <p-select
+            inputId="select-materia"
+            [(ngModel)]="materiaSeleccionadaTemp"
+            [options]="opcionesDisponibles"
+            optionLabel="nombre"
+            optionValue="materiaId"
+            [placeholder]="materiasSeleccionadasIds.length >= 3 ? '🔒 Límite de 3 materias alcanzado (9/9 cr)' : '➕ Seleccione una materia para agregar a su lista...'"
+            [filter]="true"
+            filterPlaceholder="Buscar por materia o nombre de profesor..."
+            [disabled]="guardando || materiasSeleccionadasIds.length >= 3"
+            (onChange)="agregarMateria($event.value)"
+            [showClear]="false"
+            styleClass="w-full select-custom-lg"
+          >
+            <ng-template #item let-item>
+              <div class="select-option-rich">
+                <div class="select-option-rich__title">{{ item.nombre }}</div>
+                <div class="select-option-rich__meta">
+                  <span class="meta-tag meta-tag--profesor"><i class="pi pi-user"></i> {{ item.nombreProfesor }}</span>
+                  <span class="meta-tag meta-tag--creditos"><i class="pi pi-bookmark"></i> {{ item.creditos }} cr.</span>
                 </div>
               </div>
-            }
-          </div>
+            </ng-template>
+          </p-select>
+          @if (materiasSeleccionadasIds.length < 3) {
+            <small class="text-muted block mt-1">
+              <i class="pi pi-info-circle mr-1"></i> Las materias del mismo profesor se ocultan automáticamente para evitar duplicados.
+            </small>
+          }
+        </div>
 
-          <!-- MATERIA 2 -->
-          <div class="field-container">
-            <label class="field__label" for="m2">
-              <span class="field__number">2</span> Materia 2
-            </label>
-            <p-select
-              inputId="m2"
-              [(ngModel)]="materia2"
-              [options]="opcionesPara(2)"
-              optionLabel="nombre"
-              optionValue="materiaId"
-              placeholder="🔍 Seleccione segunda materia"
-              [filter]="true"
-              filterPlaceholder="Buscar por nombre o profesor..."
-              [disabled]="guardando"
-              (onChange)="onMateriaChange()"
-              [showClear]="true"
-              styleClass="w-full select-custom"
-            >
-              <ng-template #item let-item>
-                <div class="select-option-rich">
-                  <div class="select-option-rich__title">{{ item.nombre }}</div>
-                  <div class="select-option-rich__meta">
-                    <span class="meta-tag meta-tag--profesor"><i class="pi pi-user"></i> {{ item.nombreProfesor }}</span>
-                    <span class="meta-tag meta-tag--creditos"><i class="pi pi-bookmark"></i> {{ item.creditos }} cr.</span>
+        <!-- CUADRÍCULA DE TARJETAS DE MATERIAS SELECCIONADAS -->
+        <div class="cards-section mb-4">
+          <h3 class="cards-section__title">
+            <i class="pi pi-th-large text-primary"></i> Materias preparadas para inscripción ({{ materiasSeleccionadasObjs.length }} de 3)
+          </h3>
+
+          @if (materiasSeleccionadasObjs.length === 0) {
+            <div class="empty-cards-dropzone">
+              <i class="pi pi-plus-circle dropzone-icon"></i>
+              <p>Aún no ha agregado materias. Use el buscador de arriba para ir agregando sus materias.</p>
+            </div>
+          } @else {
+            <div class="selected-cards-grid">
+              @for (item of materiasSeleccionadasObjs; track item.materiaId; let idx = $index) {
+                <div class="materia-card-active fade-in">
+                  <div class="materia-card-active__header">
+                    <span class="materia-card-active__badge">#{{ idx + 1 }}</span>
+                    <span class="badge-credit-pill">{{ item.creditos }} Créditos</span>
+                  </div>
+                  <div class="materia-card-active__content">
+                    <h4 class="materia-card-active__title">{{ item.nombre }}</h4>
+                    <div class="materia-card-active__profesor">
+                      <i class="pi pi-user text-primary"></i>
+                      <span>Profesor: <strong>{{ item.nombreProfesor }}</strong></span>
+                    </div>
+                  </div>
+                  <div class="materia-card-active__actions">
+                    <p-button
+                      label="Quitar materia"
+                      icon="pi pi-trash"
+                      severity="danger"
+                      [outlined]="true"
+                      size="small"
+                      (onClick)="quitarMateria(item.materiaId)"
+                    />
                   </div>
                 </div>
-              </ng-template>
-            </p-select>
-
-            <!-- TARJETA DETALLE MATERIA 2 -->
-            @if (materia2Obj) {
-              <div class="materia-card-preview fade-in">
-                <div class="materia-card-preview__body">
-                  <div class="materia-card-preview__top">
-                    <h4 class="materia-card-preview__name">{{ materia2Obj.nombre }}</h4>
-                    <span class="badge-credit">{{ materia2Obj.creditos }} cr</span>
-                  </div>
-                  <div class="materia-card-preview__profesor">
-                    <i class="pi pi-user"></i>
-                    <span>Prof: <strong>{{ materia2Obj.nombreProfesor }}</strong></span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- MATERIA 3 -->
-          <div class="field-container">
-            <label class="field__label" for="m3">
-              <span class="field__number">3</span> Materia 3
-            </label>
-            <p-select
-              inputId="m3"
-              [(ngModel)]="materia3"
-              [options]="opcionesPara(3)"
-              optionLabel="nombre"
-              optionValue="materiaId"
-              placeholder="🔍 Seleccione tercera materia"
-              [filter]="true"
-              filterPlaceholder="Buscar por nombre o profesor..."
-              [disabled]="guardando"
-              (onChange)="onMateriaChange()"
-              [showClear]="true"
-              styleClass="w-full select-custom"
-            >
-              <ng-template #item let-item>
-                <div class="select-option-rich">
-                  <div class="select-option-rich__title">{{ item.nombre }}</div>
-                  <div class="select-option-rich__meta">
-                    <span class="meta-tag meta-tag--profesor"><i class="pi pi-user"></i> {{ item.nombreProfesor }}</span>
-                    <span class="meta-tag meta-tag--creditos"><i class="pi pi-bookmark"></i> {{ item.creditos }} cr.</span>
-                  </div>
-                </div>
-              </ng-template>
-            </p-select>
-
-            <!-- TARJETA DETALLE MATERIA 3 -->
-            @if (materia3Obj) {
-              <div class="materia-card-preview fade-in">
-                <div class="materia-card-preview__body">
-                  <div class="materia-card-preview__top">
-                    <h4 class="materia-card-preview__name">{{ materia3Obj.nombre }}</h4>
-                    <span class="badge-credit">{{ materia3Obj.creditos }} cr</span>
-                  </div>
-                  <div class="materia-card-preview__profesor">
-                    <i class="pi pi-user"></i>
-                    <span>Prof: <strong>{{ materia3Obj.nombreProfesor }}</strong></span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
         </div>
 
         <div class="form-actions mt-4">
@@ -247,7 +181,7 @@
             severity="success"
             size="large"
             [loading]="guardando"
-            [disabled]="guardando || materiasSeleccionadas.length === 0"
+            [disabled]="guardando || materiasSeleccionadasIds.length === 0"
             (onClick)="registrar()"
           />
         </div>

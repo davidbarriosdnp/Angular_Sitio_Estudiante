@@ -264,48 +264,141 @@
   font-weight: 600;
 }
 
-/* Tarjeta de vista previa de la materia elegida */
-.materia-card-preview {
-  margin-top: 0.5rem;
-  padding: 0.85rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #cbd5e1;
-  border-left: 4px solid var(--p-primary-color, #3b82f6);
-  border-radius: 8px;
+/* Single Select y Tarjetas Dinámicas */
+.single-select-container {
+  padding: 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 }
 
-.materia-card-preview__top {
+.text-muted {
+  color: #64748b;
+  font-size: 0.825rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.cards-section__title {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 1rem;
 }
 
-.materia-card-preview__name {
-  margin: 0;
-  font-size: 0.925rem;
+/* Zona Vacía (Dropzone) */
+.empty-cards-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1rem;
+  background: #fafafa;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  text-align: center;
+  color: #64748b;
+
+  p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    max-width: 24rem;
+  }
+}
+
+.dropzone-icon {
+  font-size: 2.25rem;
+  color: #94a3b8;
+}
+
+/* Grilla de Tarjetas Seleccionadas */
+.selected-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.1rem;
+}
+
+.materia-card-active {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.1rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-top: 4px solid var(--p-primary-color, #3b82f6);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.materia-card-active__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.materia-card-active__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge-credit-pill {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+}
+
+.materia-card-active__content {
+  margin-bottom: 1rem;
+}
+
+.materia-card-active__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.35;
 }
 
-.badge-credit {
-  background: #3b82f6;
-  color: #ffffff;
-  font-size: 0.725rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 12px;
-  white-space: nowrap;
-}
-
-.materia-card-preview__profesor {
+.materia-card-active__profesor {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.825rem;
+  gap: 0.45rem;
+  font-size: 0.85rem;
   color: #475569;
-  margin-top: 0.4rem;
+}
+
+.materia-card-active__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
 }
 
 /* Acciones del formulario */

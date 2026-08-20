@@ -67,9 +67,8 @@ export class MiInscripcionPage implements OnInit {
   protected cargando = false;
   protected guardando = false;
 
-  protected materia1: number | null = null;
-  protected materia2: number | null = null;
-  protected materia3: number | null = null;
+  protected materiasSeleccionadasIds: number[] = [];
+  protected materiaSeleccionadaTemp: number | null = null;
 
   protected companerosPorMateria = new Map<number, string[]>();
   protected cargandoCompaneros: number | null = null;
@@ -132,67 +131,62 @@ export class MiInscripcionPage implements OnInit {
     return this.inscripciones.length >= 3;
   }
 
-  /** Opciones de materia respetando uno solo profesor por las tres y sin repetir materia. */
-  protected opcionesPara(slot: 1 | 2 | 3): MateriaCatalogoDto[] {
-    const sel: (number | null)[] = [this.materia1, this.materia2, this.materia3];
-    const idx = slot - 1;
-    const current = sel[idx];
-    const otherIds = sel
-      .map((sid, i) => (i !== idx && sid != null ? sid : null))
-      .filter((sid): sid is number => sid != null);
-    
-    // Obtener los profesores de los otros slots seleccionados
-    const otherProfs = new Set<number>();
-    for (let i = 0; i < 3; i++) {
-      if (i === idx) continue;
-      const mid = sel[i];
-      if (mid == null) continue;
-      const row = this.materias.find((m) => m.materiaId === mid);
-      if (row) otherProfs.add(row.profesorId);
-    }
+  /** Objetos completos de materias seleccionadas actualmente. */
+  protected get materiasSeleccionadasObjs(): MateriaCatalogoDto[] {
+    return this.materiasSeleccionadasIds
+      .map((id) => this.materias.find((m) => m.materiaId === id))
+      .filter((m): m is MateriaCatalogoDto => m != null);
+  }
 
+  /** Materias disponibles para agregar: sin repetir materia y sin repetir profesor. */
+  protected get opcionesDisponibles(): MateriaCatalogoDto[] {
+    const selectedProfs = new Set(this.materiasSeleccionadasObjs.map((m) => m.profesorId));
     return this.materias.filter((row) => {
-      if (current === row.materiaId) return true;
-      if (otherIds.includes(row.materiaId)) return false;
-      if (otherProfs.has(row.profesorId)) return false;
+      if (this.materiasSeleccionadasIds.includes(row.materiaId)) return false;
+      if (selectedProfs.has(row.profesorId)) return false;
       return true;
     });
   }
 
-  protected onMateriaChange(): void {
+  /** Agrega la materia elegida en el selector único a las tarjetas seleccionadas. */
+  protected agregarMateria(materiaId: number | null): void {
+    if (materiaId == null) return;
+    if (this.materiasSeleccionadasIds.length >= 3) {
+      void this.alerts.warning('Solo puede seleccionar hasta 3 materias (9 créditos máximo).');
+      this.materiaSeleccionadaTemp = null;
+      return;
+    }
+    if (!this.materiasSeleccionadasIds.includes(materiaId)) {
+      this.materiasSeleccionadasIds.push(materiaId);
+    }
+    this.materiaSeleccionadaTemp = null;
+    this.companerosPorMateria.clear();
+  }
+
+  /** Quita una materia de la lista de tarjetas seleccionadas. */
+  protected quitarMateria(materiaId: number): void {
+    this.materiasSeleccionadasIds = this.materiasSeleccionadasIds.filter((id) => id !== materiaId);
     this.companerosPorMateria.clear();
   }
 
   protected registrar(): void {
     if (this.estudianteId == null) return;
     
-    // Validar que al menos se haya seleccionado una materia
-    if (this.materia1 == null && this.materia2 == null && this.materia3 == null) {
-      void this.alerts.warning('Seleccione al menos una materia.');
+    if (this.materiasSeleccionadasIds.length === 0) {
+      void this.alerts.warning('Seleccione al menos una materia para inscribir.');
       return;
     }
-    
-    const ids = [this.materia1, this.materia2, this.materia3].filter((mid): mid is number => mid != null);
-    
-    // Validar que las materias no nulas sean distintas
-    if (new Set(ids).size !== ids.length) {
-      void this.alerts.warning('Las materias seleccionadas deben ser distintas.');
-      return;
-    }
-    
-    // Validar profesores únicos para las materias no nulas seleccionadas
-    const profs = ids.map((mid) => this.materias.find((m) => m.materiaId === mid)?.profesorId);
-    if (profs.some((p) => p == null) || new Set(profs as number[]).size !== profs.length) {
-      void this.alerts.warning('No puede elegir materias del mismo profesor.');
-      return;
-    }
+
+    const id1 = this.materiasSeleccionadasIds[0] ?? null;
+    const id2 = this.materiasSeleccionadasIds[1] ?? null;
+    const id3 = this.materiasSeleccionadasIds[2] ?? null;
 
     this.guardando = true;
     this.estudiantesApi
       .registrarInscripcion(this.estudianteId, {
-        materiaId1: this.materia1,
-        materiaId2: this.materia2,
-        materiaId3: this.materia3,
+        materiaId1: id1,
+        materiaId2: id2,
+        materiaId3: id3,
       })
       .pipe(finalize(() => this.syncFinGuardado()))
       .subscribe({
@@ -201,8 +195,9 @@ export class MiInscripcionPage implements OnInit {
             void this.alerts.error(res.mensaje || 'No se pudo registrar la inscripción.');
             return;
           }
-          void this.alerts.success(res.mensaje || 'Inscripción registrada con éxito (3 materias, 9 créditos).');
-          this.materia1 = this.materia2 = this.materia3 = null;
+          void this.alerts.success(res.mensaje || 'Inscripción registrada con éxito.');
+          this.materiasSeleccionadasIds = [];
+          this.materiaSeleccionadaTemp = null;
           this.companerosPorMateria.clear();
           const eid = this.estudianteId;
           if (eid != null) this.refrescarCatalogoYInscripcion(eid);
@@ -233,26 +228,8 @@ export class MiInscripcionPage implements OnInit {
     return this.companerosPorMateria.get(materiaId) ?? [];
   }
 
-  protected get materia1Obj(): MateriaCatalogoDto | undefined {
-    return this.materias.find((m) => m.materiaId === this.materia1);
-  }
-
-  protected get materia2Obj(): MateriaCatalogoDto | undefined {
-    return this.materias.find((m) => m.materiaId === this.materia2);
-  }
-
-  protected get materia3Obj(): MateriaCatalogoDto | undefined {
-    return this.materias.find((m) => m.materiaId === this.materia3);
-  }
-
-  protected get materiasSeleccionadas(): MateriaCatalogoDto[] {
-    return [this.materia1Obj, this.materia2Obj, this.materia3Obj].filter(
-      (m): m is MateriaCatalogoDto => m != null
-    );
-  }
-
   protected get totalCreditosSeleccionados(): number {
-    return this.materiasSeleccionadas.reduce((acc, m) => acc + (m.creditos || 3), 0);
+    return this.materiasSeleccionadasObjs.reduce((acc, m) => acc + (m.creditos || 3), 0);
   }
 
   protected get totalCreditosInscritos(): number {
