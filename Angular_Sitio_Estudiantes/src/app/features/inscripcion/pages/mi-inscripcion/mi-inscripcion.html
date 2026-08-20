@@ -3,9 +3,9 @@
     <h1 class="page__title">Mi inscripción</h1>
     <p class="page__subtitle">
       @if (estudianteId != null) {
-        Elija exactamente 3 materias (9 créditos), sin repetir profesor. En cada clase solo verá los nombres de quienes comparten materia con usted.
+        Elija hasta 3 materias (9 créditos máximo), sin repetir profesor. En cada clase solo verá los nombres de quienes comparten materia con usted.
       } @else {
-        Inscripción a tres materias y consulta de compañeros por clase, cuando su expediente esté vinculado a esta cuenta.
+        Inscripción a materias y consulta de compañeros por clase, cuando su expediente esté vinculado a esta cuenta.
       }
     </p>
   </div>
@@ -54,48 +54,51 @@
       } @else {
         <div class="grid-materias">
           <div class="field">
-            <label class="field__label" for="m1">Materia 1</label>
+            <label class="field__label" for="m1">Materia 1 (Opcional)</label>
             <p-select
               inputId="m1"
               [(ngModel)]="materia1"
               [options]="opcionesPara(1)"
               optionLabel="nombre"
               optionValue="materiaId"
-              placeholder="Elija materia"
+              placeholder="Elija materia 1"
               [filter]="true"
               filterPlaceholder="Buscar"
               [disabled]="guardando"
               (onChange)="onMateriaChange()"
+              [showClear]="true"
               styleClass="w-full"
             />
           </div>
           <div class="field">
-            <label class="field__label" for="m2">Materia 2</label>
+            <label class="field__label" for="m2">Materia 2 (Opcional)</label>
             <p-select
               inputId="m2"
               [(ngModel)]="materia2"
               [options]="opcionesPara(2)"
               optionLabel="nombre"
               optionValue="materiaId"
-              placeholder="Elija materia"
+              placeholder="Elija materia 2"
               [filter]="true"
               [disabled]="guardando"
               (onChange)="onMateriaChange()"
+              [showClear]="true"
               styleClass="w-full"
             />
           </div>
           <div class="field">
-            <label class="field__label" for="m3">Materia 3</label>
+            <label class="field__label" for="m3">Materia 3 (Opcional)</label>
             <p-select
               inputId="m3"
               [(ngModel)]="materia3"
               [options]="opcionesPara(3)"
               optionLabel="nombre"
               optionValue="materiaId"
-              placeholder="Elija materia"
+              placeholder="Elija materia 3"
               [filter]="true"
               [disabled]="guardando"
               (onChange)="onMateriaChange()"
+              [showClear]="true"
               styleClass="w-full"
             />
           </div>

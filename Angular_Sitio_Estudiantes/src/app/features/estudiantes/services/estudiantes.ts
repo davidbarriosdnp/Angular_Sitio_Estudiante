@@ -120,7 +120,7 @@ export interface InscripcionEstudianteDto {
 }
 
 export interface InscripcionSolicitudPayload {
-  materiaId1: number;
-  materiaId2: number;
-  materiaId3: number;
+  materiaId1: number | null;
+  materiaId2: number | null;
+  materiaId3: number | null;
 }

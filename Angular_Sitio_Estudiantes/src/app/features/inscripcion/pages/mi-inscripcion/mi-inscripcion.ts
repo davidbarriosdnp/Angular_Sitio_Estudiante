@@ -132,7 +132,7 @@ export class MiInscripcionPage implements OnInit {
     return this.inscripciones.length >= 3;
   }
 
-  /** Opciones de materia respetando “un solo profesor por las tres” y sin repetir materia. */
+  /** Opciones de materia respetando uno solo profesor por las tres y sin repetir materia. */
   protected opcionesPara(slot: 1 | 2 | 3): MateriaCatalogoDto[] {
     const sel: (number | null)[] = [this.materia1, this.materia2, this.materia3];
     const idx = slot - 1;
@@ -140,6 +140,8 @@ export class MiInscripcionPage implements OnInit {
     const otherIds = sel
       .map((sid, i) => (i !== idx && sid != null ? sid : null))
       .filter((sid): sid is number => sid != null);
+    
+    // Obtener los profesores de los otros slots seleccionados
     const otherProfs = new Set<number>();
     for (let i = 0; i < 3; i++) {
       if (i === idx) continue;
@@ -148,6 +150,7 @@ export class MiInscripcionPage implements OnInit {
       const row = this.materias.find((m) => m.materiaId === mid);
       if (row) otherProfs.add(row.profesorId);
     }
+
     return this.materias.filter((row) => {
       if (current === row.materiaId) return true;
       if (otherIds.includes(row.materiaId)) return false;
@@ -162,18 +165,25 @@ export class MiInscripcionPage implements OnInit {
 
   protected registrar(): void {
     if (this.estudianteId == null) return;
-    if (this.materia1 == null || this.materia2 == null || this.materia3 == null) {
-      void this.alerts.warning('Seleccione las tres materias.');
+    
+    // Validar que al menos se haya seleccionado una materia
+    if (this.materia1 == null && this.materia2 == null && this.materia3 == null) {
+      void this.alerts.warning('Seleccione al menos una materia.');
       return;
     }
-    const ids = [this.materia1, this.materia2, this.materia3];
-    if (new Set(ids).size !== 3) {
-      void this.alerts.warning('Las tres materias deben ser distintas.');
+    
+    const ids = [this.materia1, this.materia2, this.materia3].filter((mid): mid is number => mid != null);
+    
+    // Validar que las materias no nulas sean distintas
+    if (new Set(ids).size !== ids.length) {
+      void this.alerts.warning('Las materias seleccionadas deben ser distintas.');
       return;
     }
+    
+    // Validar profesores únicos para las materias no nulas seleccionadas
     const profs = ids.map((mid) => this.materias.find((m) => m.materiaId === mid)?.profesorId);
-    if (profs.some((p) => p == null) || new Set(profs as number[]).size !== 3) {
-      void this.alerts.warning('No puede elegir dos materias del mismo profesor.');
+    if (profs.some((p) => p == null) || new Set(profs as number[]).size !== profs.length) {
+      void this.alerts.warning('No puede elegir materias del mismo profesor.');
       return;
     }
 
@@ -191,7 +201,7 @@ export class MiInscripcionPage implements OnInit {
             void this.alerts.error(res.mensaje || 'No se pudo registrar la inscripción.');
             return;
           }
-          void this.alerts.success(res.mensaje || 'Inscripción registrada.');
+          void this.alerts.success(res.mensaje || 'Inscripción registrada con éxito (3 materias, 9 créditos).');
           this.materia1 = this.materia2 = this.materia3 = null;
           this.companerosPorMateria.clear();
           const eid = this.estudianteId;
