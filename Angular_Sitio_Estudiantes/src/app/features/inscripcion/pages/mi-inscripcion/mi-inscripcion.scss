@@ -270,6 +270,21 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
+  width: 100%;
+}
+
+:host ::ng-deep {
+  .p-select,
+  p-select {
+    width: 100% !important;
+    display: flex !important;
+  }
+  
+  .p-select-label {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center;
+  }
 }
 
 .text-muted {

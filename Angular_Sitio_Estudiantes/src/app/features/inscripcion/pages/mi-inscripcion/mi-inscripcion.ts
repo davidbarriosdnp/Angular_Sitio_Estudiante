@@ -153,13 +153,19 @@ export class MiInscripcionPage implements OnInit {
     if (materiaId == null) return;
     if (this.materiasSeleccionadasIds.length >= 3) {
       void this.alerts.warning('Solo puede seleccionar hasta 3 materias (9 créditos máximo).');
-      this.materiaSeleccionadaTemp = null;
+      setTimeout(() => {
+        this.materiaSeleccionadaTemp = null;
+        this.cdr.markForCheck();
+      }, 0);
       return;
     }
     if (!this.materiasSeleccionadasIds.includes(materiaId)) {
       this.materiasSeleccionadasIds.push(materiaId);
     }
-    this.materiaSeleccionadaTemp = null;
+    setTimeout(() => {
+      this.materiaSeleccionadaTemp = null;
+      this.cdr.markForCheck();
+    }, 0);
     this.companerosPorMateria.clear();
   }
 
