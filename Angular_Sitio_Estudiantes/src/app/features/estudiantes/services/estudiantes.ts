@@ -106,6 +106,13 @@ export interface MateriaCatalogoDto {
   fechaRegistro: string;
   fechaModificacion: string | null;
   estado: number;
+  aulaId: number | null;
+  nombreAula: string;
+  nombreSede: string;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  horaInicio: string | null;
+  horaFin: string | null;
 }
 
 export interface InscripcionEstudianteDto {
@@ -117,6 +124,13 @@ export interface InscripcionEstudianteDto {
   fechaRegistro: string;
   fechaModificacion: string | null;
   estado: number;
+  aulaId: number | null;
+  nombreAula: string;
+  nombreSede: string;
+  fechaInicio: string | null;
+  fechaFin: string | null;
+  horaInicio: string | null;
+  horaFin: string | null;
 }
 
 export interface InscripcionSolicitudPayload {

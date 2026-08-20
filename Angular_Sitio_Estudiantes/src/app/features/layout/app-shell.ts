@@ -25,8 +25,8 @@ export class AppShell implements OnInit {
     if (this.auth.puedeAccederModuloInscripcion()) {
       items.push({ label: 'Mi inscripción', icon: 'pi pi-book', routerLink: '/mi-inscripcion' });
     }
-    items.push({ label: 'Estudiantes', icon: 'pi pi-users', routerLink: '/estudiantes' });
     if (this.auth.esAdministrador()) {
+      items.push({ label: 'Estudiantes', icon: 'pi pi-users', routerLink: '/estudiantes' });
       items.push({
         label: 'Catálogo',
         icon: 'pi pi-list',
