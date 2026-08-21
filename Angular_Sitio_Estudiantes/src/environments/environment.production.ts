@@ -9,5 +9,5 @@ import type { AppEnvironment } from './environment.interface';
 export const environment: AppEnvironment = {
   envName: 'production',
   production: true,
-  apiBaseUrl: 'http://3.215.185.177',
+  apiBaseUrl: 'https://3-215-185-177.sslip.io',
 };
