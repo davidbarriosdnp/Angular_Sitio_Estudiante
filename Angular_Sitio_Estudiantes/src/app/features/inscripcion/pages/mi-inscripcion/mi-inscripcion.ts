@@ -21,6 +21,8 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageModule } from 'primeng/message';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   selector: 'app-mi-inscripcion',
@@ -36,6 +38,8 @@ import { MessageModule } from 'primeng/message';
     TagModule,
     ProgressSpinnerModule,
     MessageModule,
+    DialogModule,
+    InputTextModule,
   ],
   templateUrl: './mi-inscripcion.html',
   styleUrl: './mi-inscripcion.scss',
@@ -334,7 +338,16 @@ export class MiInscripcionPage implements OnInit {
     }
   }
 
-  protected verCompaneros(materiaId: number): void {
+  // ==========================================
+  // ESTADOS DEL MODAL DE COMPAÑEROS
+  // ==========================================
+  protected mostrarModalCompaneros = false;
+  protected tituloModalCompaneros = '';
+  protected todosLosCompanerosActuales: string[] = [];
+  protected companerosFiltrados: string[] = [];
+  protected filtroCompaneros = '';
+
+  protected verCompaneros(materiaId: number, nombreMateria: string): void {
     if (this.estudianteId == null) return;
     this.cargandoCompaneros = materiaId;
     this.estudiantesApi
@@ -346,14 +359,24 @@ export class MiInscripcionPage implements OnInit {
             void this.alerts.warning(res.mensaje || 'No se pudieron cargar los compañeros.');
             return;
           }
-          this.companerosPorMateria.set(materiaId, res.resultado ?? []);
+          this.todosLosCompanerosActuales = res.resultado ?? [];
+          this.companerosFiltrados = [...this.todosLosCompanerosActuales];
+          this.filtroCompaneros = '';
+          this.tituloModalCompaneros = nombreMateria;
+          this.mostrarModalCompaneros = true;
+          this.cdr.markForCheck();
         },
         error: (e) => void this.alerts.apiError(e),
       });
   }
 
-  protected nombresCompaneros(materiaId: number): string[] {
-    return this.companerosPorMateria.get(materiaId) ?? [];
+  protected filtrarCompaneros(): void {
+    if (!this.filtroCompaneros) {
+      this.companerosFiltrados = [...this.todosLosCompanerosActuales];
+    } else {
+      const txt = this.filtroCompaneros.toLowerCase();
+      this.companerosFiltrados = this.todosLosCompanerosActuales.filter(n => n.toLowerCase().includes(txt));
+    }
   }
 
   protected get totalCreditosSeleccionados(): number {

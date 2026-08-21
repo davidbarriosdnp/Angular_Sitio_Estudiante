@@ -1,65 +1,95 @@
-<div class="login">
-  <p-card styleClass="login__card">
-    <ng-template pTemplate="header">
-      <div class="login__hero">
-        <span class="login__icon pi pi-graduation-cap" aria-hidden="true"></span>
-        <div>
-          <h1 class="login__title">Portal estudiantes</h1>
-          <p class="login__lead">Inicie sesión para continuar</p>
+<div class="login-split">
+  <!-- PANEL IZQUIERDO: REGISTRO (HÉROE) -->
+  <section class="login-hero fade-in-left">
+    <div class="login-hero__content">
+      <div class="login-hero__badge">Inscripciones Abiertas 2026</div>
+      <h1 class="login-hero__title">Comienza tu futuro académico hoy.</h1>
+      <p class="login-hero__lead">
+        Crea tu expediente, elige tu programa y diseña el horario perfecto para ti en cuestión de minutos. El portal de estudiantes definitivo.
+      </p>
+      
+      <div class="login-hero__features">
+        <div class="feature-item">
+          <i class="pi pi-check-circle"></i>
+          <span>Inscripción ágil</span>
+        </div>
+        <div class="feature-item">
+          <i class="pi pi-users"></i>
+          <span>Directorio de compañeros</span>
+        </div>
+        <div class="feature-item">
+          <i class="pi pi-calendar"></i>
+          <span>Horario inteligente</span>
         </div>
       </div>
-    </ng-template>
 
-    <form class="login__form" (ngSubmit)="iniciarSesion()">
-      <label class="login__field">
-        <span class="login__label">Usuario</span>
-        <input
-          pInputText
-          name="nombreUsuario"
-          [(ngModel)]="nombreUsuario"
-          autocomplete="username"
-          [disabled]="loading"
-          class="w-full"
-        />
-      </label>
-      <label class="login__field">
-        <span class="login__label">Contraseña</span>
-        <p-password
-          [(ngModel)]="password"
-          name="password"
-          [feedback]="false"
-          [toggleMask]="true"
-          [disabled]="loading"
-          styleClass="w-full"
-          inputStyleClass="w-full"
-          autocomplete="current-password"
-        />
-      </label>
-      <p-button
-        type="submit"
-        label="Entrar"
-        icon="pi pi-sign-in"
-        styleClass="w-full"
-        [loading]="loading"
-        [disabled]="loading"
-      />
+      <a routerLink="/registro" class="login-hero__cta p-button p-component">
+        <span class="pi pi-rocket p-button-icon p-button-icon-left"></span>
+        <span class="p-button-label">Crear cuenta e inscribirme</span>
+      </a>
+    </div>
+    
+    <div class="login-hero__illustration" aria-hidden="true">
+      <i class="pi pi-graduation-cap"></i>
+    </div>
+  </section>
 
-      <aside class="login__enroll" aria-label="Registro e inscripción en línea">
-        <div class="login__enroll-inner">
-          <span class="login__enroll-icon pi pi-user-plus" aria-hidden="true"></span>
-          <div class="login__enroll-copy">
-            <p class="login__enroll-kicker">¿Aún no está registrado?</p>
-            <p class="login__enroll-text">
-              Use el <strong>registro en línea</strong> para crear su cuenta de estudiante, elegir un programa de créditos y vincular su expediente. Después podrá
-              acceder al portal e inscribir sus materias.
-            </p>
-            <a routerLink="/registro" class="login__enroll-cta">
-              Ir a registro e inscripción
-              <span class="pi pi-arrow-right login__enroll-cta-icon" aria-hidden="true"></span>
-            </a>
+  <!-- PANEL DERECHO: LOGIN (UTILIDAD) -->
+  <section class="login-panel fade-in-right">
+    <div class="login-panel__inner">
+      <h2 class="login-panel__title">¿Ya eres estudiante?</h2>
+      <p class="login-panel__subtitle">Ingresa tus credenciales para acceder a tu portal.</p>
+
+      <form class="login-form" (ngSubmit)="iniciarSesion()">
+        <div class="login-form__field">
+          <label for="username">Usuario</label>
+          <div class="p-input-icon-left w-full">
+            <i class="pi pi-user"></i>
+            <input
+              id="username"
+              pInputText
+              name="nombreUsuario"
+              [(ngModel)]="nombreUsuario"
+              autocomplete="username"
+              [disabled]="loading"
+              class="w-full"
+              placeholder="Tu nombre de usuario"
+            />
           </div>
         </div>
-      </aside>
-    </form>
-  </p-card>
+
+        <div class="login-form__field">
+          <label for="password">Contraseña</label>
+          <div class="p-input-icon-left w-full">
+            <i class="pi pi-lock z-1"></i>
+            <p-password
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              [feedback]="false"
+              [toggleMask]="true"
+              [disabled]="loading"
+              styleClass="w-full password-icon-padding"
+              inputStyleClass="w-full pl-5"
+              autocomplete="current-password"
+              placeholder="Tu contraseña secreta"
+            />
+          </div>
+        </div>
+
+        <div class="login-form__actions">
+          <p-button
+            type="submit"
+            label="Iniciar sesión"
+            icon="pi pi-sign-in"
+            styleClass="w-full"
+            severity="secondary"
+            [outlined]="true"
+            [loading]="loading"
+            [disabled]="loading"
+          />
+        </div>
+      </form>
+    </div>
+  </section>
 </div>

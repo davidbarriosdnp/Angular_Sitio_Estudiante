@@ -154,9 +154,19 @@
                   </div>
                   <div class="materia-card-active__content">
                     <h4 class="materia-card-active__title">{{ item.nombre }}</h4>
-                    <div class="materia-card-active__profesor">
-                      <i class="pi pi-user text-primary"></i>
-                      <span>Profesor: <strong>{{ item.nombreProfesor }}</strong></span>
+                    <div class="materia-card-active__details">
+                      <div class="materia-card-active__detail">
+                        <i class="pi pi-user text-primary"></i>
+                        <span>Profesor: <strong>{{ item.nombreProfesor }}</strong></span>
+                      </div>
+                      <div class="materia-card-active__detail">
+                        <i class="pi pi-map-marker text-success"></i>
+                        <span>{{ item.nombreSede || 'Por definir' }} <strong *ngIf="item.nombreAula">({{ item.nombreAula }})</strong></span>
+                      </div>
+                      <div class="materia-card-active__detail">
+                        <i class="pi pi-clock text-warning"></i>
+                        <span>{{ item.horaInicio || '--:--' }} a {{ item.horaFin || '--:--' }}</span>
+                      </div>
                     </div>
                   </div>
                   <div class="materia-card-active__actions">
@@ -249,17 +259,8 @@
                     size="small"
                     [outlined]="true"
                     [loading]="cargandoCompaneros === row.materiaId"
-                    (onClick)="verCompaneros(row.materiaId)"
+                    (onClick)="verCompaneros(row.materiaId, row.nombreMateria)"
                   />
-                  @if (nombresCompaneros(row.materiaId).length) {
-                    <div class="companeros-chips-container">
-                      @for (n of nombresCompaneros(row.materiaId); track n) {
-                        <span class="companero-chip">
-                          <i class="pi pi-user"></i> {{ n }}
-                        </span>
-                      }
-                    </div>
-                  }
                 </div>
               </td>
             </tr>
@@ -269,3 +270,48 @@
     </p-card>
   }
 </section>
+
+<!-- MODAL DE COMPAÑEROS DE CLASE -->
+<p-dialog
+  [(visible)]="mostrarModalCompaneros"
+  [modal]="true"
+  [header]="'Compañeros en: ' + tituloModalCompaneros"
+  [style]="{ width: '35rem' }"
+  [breakpoints]="{ '1199px': '50vw', '575px': '90vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="companeros-modal-content">
+    <div class="companeros-modal-search">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input 
+          pInputText 
+          type="text" 
+          placeholder="Buscar un compañero..." 
+          [(ngModel)]="filtroCompaneros" 
+          (input)="filtrarCompaneros()" 
+          class="w-full"
+        />
+      </span>
+    </div>
+    
+    <div class="companeros-list">
+      @if (companerosFiltrados.length === 0) {
+        <div class="companeros-empty">
+          <i class="pi pi-users empty-icon"></i>
+          <p>No se encontraron compañeros.</p>
+        </div>
+      } @else {
+        @for (comp of companerosFiltrados; track comp) {
+          <div class="companero-item">
+            <div class="companero-avatar">
+              <i class="pi pi-user"></i>
+            </div>
+            <div class="companero-name">{{ comp }}</div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</p-dialog>

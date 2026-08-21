@@ -102,3 +102,46 @@
     font-size: 1.1rem;
   }
 }
+
+::ng-deep .home__schedule-calendar {
+  .p-card-body {
+    padding: 1.5rem;
+  }
+  
+  .fc {
+    --fc-border-color: var(--p-surface-200, #e2e8f0);
+    --fc-button-text-color: #fff;
+    --fc-button-bg-color: var(--p-primary-500, #6366f1);
+    --fc-button-border-color: var(--p-primary-500, #6366f1);
+    --fc-button-hover-bg-color: var(--p-primary-600, #4f46e5);
+    --fc-button-hover-border-color: var(--p-primary-600, #4f46e5);
+    --fc-button-active-bg-color: var(--p-primary-700, #4338ca);
+    --fc-button-active-border-color: var(--p-primary-700, #4338ca);
+    --fc-event-bg-color: var(--p-primary-500, #6366f1);
+    --fc-event-border-color: var(--p-primary-500, #6366f1);
+    --fc-event-text-color: #fff;
+    --fc-page-bg-color: #fff;
+    --fc-neutral-bg-color: var(--p-surface-50, #f8fafc);
+    --fc-neutral-text-color: var(--p-text-color, #334155);
+    --fc-today-bg-color: rgba(99, 102, 241, 0.05);
+    font-family: inherit;
+  }
+
+  .fc-timegrid-slot-label-cushion {
+    color: var(--p-text-muted-color, #64748b);
+    font-size: 0.85rem;
+  }
+  
+  .fc-col-header-cell-cushion {
+    padding: 0.75rem 0;
+    font-size: 1rem;
+    color: var(--p-text-color, #334155);
+  }
+
+  .fc-event {
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: none;
+    padding: 2px;
+  }
+}
