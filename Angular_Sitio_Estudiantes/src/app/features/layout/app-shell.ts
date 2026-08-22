@@ -34,6 +34,8 @@ export class AppShell implements OnInit {
           { label: 'Programas de crédito', icon: 'pi pi-folder', routerLink: '/programas-credito' },
           { label: 'Materias', icon: 'pi pi-bookmark', routerLink: '/materias' },
           { label: 'Profesores', icon: 'pi pi-user', routerLink: '/profesores' },
+          { label: 'Sedes', icon: 'pi pi-building', routerLink: '/sedes' },
+          { label: 'Aulas', icon: 'pi pi-warehouse', routerLink: '/aulas' },
         ],
       });
       items.push({ label: 'Usuarios', icon: 'pi pi-id-card', routerLink: '/usuarios' });

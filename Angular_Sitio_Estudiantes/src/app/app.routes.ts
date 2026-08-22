@@ -59,6 +59,18 @@ export const routes: Routes = [
           import('./features/profesores/pages/lista-profesores/lista-profesores').then((m) => m.ListaProfesoresPage),
       },
       {
+        path: 'sedes',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/sedes/pages/lista-sedes/lista-sedes').then((m) => m.ListaSedesPage),
+      },
+      {
+        path: 'aulas',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/aulas/pages/lista-aulas/lista-aulas').then((m) => m.ListaAulasPage),
+      },
+      {
         path: 'mi-inscripcion',
         canActivate: [estudianteInscripcionGuard],
         loadComponent: () =>

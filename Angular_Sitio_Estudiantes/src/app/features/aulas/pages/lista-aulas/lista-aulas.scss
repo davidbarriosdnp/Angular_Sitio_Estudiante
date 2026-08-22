@@ -1,0 +1,65 @@
+.page__head {
+  margin-bottom: 1rem;
+}
+
+.page__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.page__subtitle {
+  margin: 0.35rem 0 0;
+  color: var(--p-text-muted-color, #64748b);
+  font-size: 0.95rem;
+}
+
+.page__toolbar {
+  margin-bottom: 1rem;
+  border-radius: var(--p-content-border-radius, 8px);
+}
+
+.page__table-wrap {
+  background: var(--p-surface-0, #fff);
+  border-radius: var(--p-content-border-radius, 8px);
+  border: 1px solid var(--p-content-border-color, #e2e8f0);
+  padding: 0.5rem;
+}
+
+.page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem;
+}
+
+.acciones {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding-top: 0.25rem;
+}
+
+.field__label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+  color: var(--p-text-color, #0f172a);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
